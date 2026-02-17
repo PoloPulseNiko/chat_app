@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Profiles{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>All Profiles</h2>
+    <a href="{% url 'profile_create' %}" class="btn btn-success mb-3">Create Profile</a>
+
+    <div class="list-group">
+        {% for profile in profiles %}
+            <a href="{% url 'profile_detail' profile.pk %}" class="list-group-item list-group-item-action">
+                <strong>{{ profile.nickname }}</strong>
+                <p>{{ profile.bio|truncatewords:15 }}</p>
+            </a>
+        {% empty %}
+            <p class="text-muted">No profiles yet.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Create Room{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Create a Chat Room</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="mb-3">
+            {{ form.name.label_tag }}
+            {{ form.name }}
+            {{ form.name.errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.description.label_tag }}
+            {{ form.description }}
+            {{ form.description.errors }}
+        </div>
+        <button type="submit" class="btn btn-primary">Create Room</button>
+        <a href="{% url 'room_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

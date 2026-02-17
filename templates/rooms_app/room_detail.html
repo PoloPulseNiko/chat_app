@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Room: {{ room.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+  <!-- Room info -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <h2 class="card-title">{{ room.name }}</h2>
+      <p class="card-text">{{ room.description }}</p>
+      <p class="text-muted">Created by: {{ room.creator.nickname }}</p>
+    </div>
+  </div>
+
+  <h4>Messages</h4>
+  <div class="list-group mb-4">
+    {% for message in messages %}
+      <div class="list-group-item">
+        <strong>{{ message.sender.nickname }}</strong> 
+        <small class="text-muted">{{ message.created_at|date:"M d, Y H:i" }}</small>
+        <p>{{ message.text }}</p>
+        <form action="{% url 'message_delete' message.pk %}" method="post" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+        </form>
+      </div>
+    {% empty %}
+      <p class="text-muted">No messages yet. Be the first to write one!</p>
+    {% endfor %}
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Send a message</h5>
+      <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="mb-3">
+          {{ form.text.errors }}
+          {{ form.text }}
+        </div>
+        <button type="submit" class="btn btn-primary">Send</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <a href="{% url 'room_list' %}" class="btn btn-secondary">Back to Rooms</a>
+  </div>
+
+</div>
+{% endblock %}
