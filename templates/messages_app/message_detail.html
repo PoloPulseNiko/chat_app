@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Message Detail{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Message Detail</h2>
+    <p><strong>From:</strong> {{ message.sender.nickname }}</p>
+    <p><strong>Room:</strong> {{ message.room.name }}</p>
+    <p><strong>Sent at:</strong> {{ message.created_at }}</p>
+    <p><strong>Message:</strong> {{ message.text }}</p>
+
+    <a href="{% url 'room_detail' message.room.pk %}" class="btn btn-secondary">Back to Room</a>
+    <a href="{% url 'message_delete' message.pk %}" class="btn btn-danger">Delete</a>
+</div>
+{% endblock %}
