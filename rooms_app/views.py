@@ -36,3 +36,20 @@ def room_create(request):
     else:
         form = RoomForm()
     return render(request, "rooms_app/room_form.html", {"form": form})
+
+def room_edit(request, pk):
+    room = get_object_or_404(Room, pk=pk)
+    if request.method == "POST":
+        form = RoomForm(request.POST, instance=room)
+        if form.is_valid():
+            form.save()
+            return redirect("room_detail", pk=room.pk)
+    else:
+        form = RoomForm(instance=room)
+    return render(request, "rooms_app/room_form.html", {"form": form})
+def room_delete(request, pk):
+    room = get_object_or_404(Room, pk=pk)
+    if request.method == "POST":
+        room.delete()
+        return redirect("room_list")  # or wherever your list view is
+    return render(request, "rooms_app/room_confirm_delete.html", {"room": room})

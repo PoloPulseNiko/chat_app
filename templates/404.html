@@ -1,10 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Lost in Space?{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <h1 class="display-1">404</h1>
+    <h2>Uh-oh! Looks like you took a wrong turn.</h2>
+    <p>The page you’re looking for has either vanished into the void or never existed. 🤔</p>
+    <img src="https://media.giphy.com/media/14uQ3cOFteDaU/giphy.gif" alt="Lost astronaut" style="max-width:300px;">
+    <p class="mt-3">But don’t worry, you can <a href="{% url 'room_list' %}">blast back to the rooms</a> and continue your chat adventure!</p>
+</div>
+{% endblock %}

@@ -1,10 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}{% if form.instance.pk %}Edit Message{% else %}New Message{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{% if form.instance.pk %}Edit{% else %}New{% endif %} Message</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="mb-3">
+            {{ form.text.label_tag }}
+            {{ form.text }}
+            {{ form.text.errors }}
+        </div>
+        <button type="submit" class="btn btn-primary">{% if form.instance.pk %}Update{% else %}Send{% endif %}</button>
+        <a href="{% if form.instance.pk %}{% url 'room_detail' form.instance.room.pk %}{% else %}{% url 'room_list' %}{% endif %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

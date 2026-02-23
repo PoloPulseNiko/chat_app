@@ -30,3 +30,10 @@ def profile_edit(request, pk):
     else:
         form = ProfileForm(instance=profile)
     return render(request, "profiles_app/profile_form.html", {"form": form})
+
+def profile_delete(request, pk):
+    profile = get_object_or_404(Profile, pk=pk)
+    if request.method == "POST":
+        profile.delete()
+        return redirect("profile_list")
+    return render(request, "profiles_app/profile_confirm_delete.html", {"profile": profile})
