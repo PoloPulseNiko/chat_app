@@ -16,9 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
+
+def home(request):
+    return redirect('/rooms/')
 urlpatterns = [
+    path('', home, name='home'),
     path('admin/', admin.site.urls),
     path('rooms/', include('rooms_app.urls')),
     path('profiles/', include('profiles_app.urls')),
