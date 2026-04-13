@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-_p(9s#j5yn3#^0(k#q-o*s+$h+sz6qb0ew(s4ca6_rdu$mxwn_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 
 # Application definition
@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'accounts_app',
     'messages_app',
     'rooms_app',
     'profiles_app',
@@ -124,3 +125,6 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+AUTH_USER_MODEL = "accounts_app.ChatUser"
+LOGIN_REDIRECT_URL = "room_list"
+LOGOUT_REDIRECT_URL = "room_list"
