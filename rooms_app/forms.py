@@ -1,17 +1,20 @@
 from django import forms
 from .models import Room
 
+
 class RoomForm(forms.ModelForm):
     class Meta:
         model = Room
-        fields = ["name", "description"]
+        fields = ["name", "description", "category"]
         labels = {
             "name": "Room Name",
             "description": "Description",
+            "category": "Category",
         }
         help_texts = {
             "name": "Enter a unique room name (3-100 characters)",
             "description": "Describe what this room is about",
+            "category": "Pick a topic so users can browse similar rooms",
         }
         widgets = {
             "name": forms.TextInput(attrs={"placeholder": "My Awesome Room", "maxlength": "100"}),

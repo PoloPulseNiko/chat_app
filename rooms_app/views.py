@@ -2,7 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Room
 from .forms import RoomForm
 from messages_app.forms import MessageForm
+from notifications_app.services import create_message_notifications, create_room_notifications
 from profiles_app.models import Profile
+from rooms_app.models import Membership
 
 def room_list(request):
     rooms = Room.objects.all()
@@ -16,9 +18,13 @@ def room_detail(request, pk):
         form = MessageForm(request.POST)
         if form.is_valid():
             message = form.save(commit=False)
-            message.sender = Profile.objects.first()
+            if request.user.is_authenticated:
+                message.sender = request.user.profile
+            else:
+                message.sender = Profile.objects.first()
             message.room = room
             message.save()
+            create_message_notifications(message)
             return redirect("room_detail", pk=room.pk)
     else:
         form = MessageForm()
@@ -30,8 +36,13 @@ def room_create(request):
         form = RoomForm(request.POST)
         if form.is_valid():
             room = form.save(commit=False)
-            room.creator = Profile.objects.first()
+            if request.user.is_authenticated:
+                room.creator = request.user.profile
+            else:
+                room.creator = Profile.objects.first()
             room.save()
+            room.members.add(room.creator)
+            Membership.objects.get_or_create(profile=room.creator, room=room)
             return redirect("room_list")
     else:
         form = RoomForm()
@@ -42,7 +53,8 @@ def room_edit(request, pk):
     if request.method == "POST":
         form = RoomForm(request.POST, instance=room)
         if form.is_valid():
-            form.save()
+            room = form.save()
+            create_room_notifications(room)
             return redirect("room_detail", pk=room.pk)
     else:
         form = RoomForm(instance=room)

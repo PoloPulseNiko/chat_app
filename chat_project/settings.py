@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts_app',
     'messages_app',
+    'notifications_app',
     'rooms_app',
     'profiles_app',
 ]

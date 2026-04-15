@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="mb-1">Notifications</h1>
+        <p class="text-muted mb-0">Unread notifications: {{ unread_count }}</p>
+    </div>
+    {% if notifications %}
+        <a href="{% url 'notification_mark_all_read' %}" class="btn btn-outline-primary">Mark all as read</a>
+    {% endif %}
+</div>
+
+{% if notifications %}
+    <div class="list-group">
+        {% for notification in notifications %}
+            <div class="list-group-item {% if not notification.is_read %}list-group-item-warning{% endif %}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="mb-1">{{ notification.text }}</p>
+                        <small class="text-muted">{{ notification.created_at }}</small>
+                    </div>
+                    {% if not notification.is_read %}
+                        <a href="{% url 'notification_mark_read' notification.pk %}" class="btn btn-sm btn-primary">Mark read</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">You do not have any notifications yet.</div>
+{% endif %}
+{% endblock %}
