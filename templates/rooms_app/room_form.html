@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}Create Room{% endblock %}
+{% block title %}{% if form.instance.pk %}Edit Room{% else %}Create Room{% endif %}{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h2>Create a Chat Room</h2>
+    <h2>{% if form.instance.pk %}Edit{% else %}Create{% endif %} a Chat Room</h2>
     <form method="post">
         {% csrf_token %}
         {{ form.non_field_errors }}
@@ -18,8 +18,13 @@
             {{ form.description }}
             {{ form.description.errors }}
         </div>
-        <button type="submit" class="btn btn-primary">Create Room</button>
-        <a href="{% url 'room_list' %}" class="btn btn-secondary">Cancel</a>
+        <div class="mb-3">
+            {{ form.category.label_tag }}
+            {{ form.category }}
+            {{ form.category.errors }}
+        </div>
+        <button type="submit" class="btn btn-primary">{% if form.instance.pk %}Update Room{% else %}Create Room{% endif %}</button>
+        <a href="{% if form.instance.pk %}{% url 'room_detail' form.instance.pk %}{% else %}{% url 'room_list' %}{% endif %}" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
 {% endblock %}

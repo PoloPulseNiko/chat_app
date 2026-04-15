@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}My Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">{{ profile.nickname }}'s Dashboard</h2>
+            <p class="text-muted mb-0">Your private space for rooms, messages, and notifications.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'profile_edit' profile.pk %}" class="btn btn-outline-primary">Edit Profile</a>
+            <a href="{% url 'room_create' %}" class="btn btn-primary">Create Room</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h4 class="card-title">My Created Rooms</h4>
+                    {% if created_rooms %}
+                        <div class="list-group list-group-flush">
+                            {% for room in created_rooms %}
+                                <a href="{% url 'room_detail' room.pk %}" class="list-group-item list-group-item-action px-0">
+                                    <strong>{{ room.name }}</strong>
+                                    <div class="text-muted small">
+                                        {% if room.category %}{{ room.category.name }}{% else %}Uncategorized{% endif %}
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">You have not created any rooms yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h4 class="card-title">Rooms I Joined</h4>
+                    {% if joined_rooms %}
+                        <div class="list-group list-group-flush">
+                            {% for room in joined_rooms %}
+                                <a href="{% url 'room_detail' room.pk %}" class="list-group-item list-group-item-action px-0">
+                                    <strong>{{ room.name }}</strong>
+                                    <div class="text-muted small">{{ room.creator.nickname }}</div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">You have not joined any other rooms yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="card-title mb-0">Recent Notifications</h4>
+                        <a href="{% url 'notification_list' %}" class="btn btn-sm btn-outline-secondary">View all</a>
+                    </div>
+                    <p class="text-muted small">Unread: {{ unread_notifications_count }}</p>
+                    {% if notifications %}
+                        <div class="list-group list-group-flush">
+                            {% for notification in notifications %}
+                                <a href="{% url 'notification_list' %}" class="list-group-item list-group-item-action px-0 {% if not notification.is_read %}fw-semibold{% endif %}">
+                                    {{ notification.text }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No notifications yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h4 class="card-title">My Recent Messages</h4>
+                    {% if recent_messages %}
+                        <div class="list-group list-group-flush">
+                            {% for message in recent_messages %}
+                                <a href="{% url 'room_detail' message.room.pk %}" class="list-group-item list-group-item-action px-0">
+                                    <strong>{{ message.room.name }}</strong>
+                                    <div>{{ message.text|truncatewords:12 }}</div>
+                                    <div class="text-muted small">{{ message.created_at|date:"M d, Y H:i" }}</div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">You have not posted any messages yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

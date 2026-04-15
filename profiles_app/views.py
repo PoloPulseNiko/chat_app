@@ -1,5 +1,11 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
+from django.views.generic import TemplateView
+
+from messages_app.models import Message
+from notifications_app.models import Notification
+from rooms_app.models import Membership, Room
+
 from .models import Profile
 from .forms import ProfileForm
 
@@ -54,3 +60,34 @@ def profile_delete(request, pk):
         user.delete()
         return redirect("profile_list")
     return render(request, "profiles_app/profile_confirm_delete.html", {"profile": profile})
+
+
+class DashboardView(TemplateView):
+    template_name = "profiles_app/dashboard.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("login")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        profile = self.request.user.profile
+
+        created_rooms = Room.objects.filter(creator=profile).select_related("category")
+        memberships = Membership.objects.filter(profile=profile).select_related("room", "room__category")
+        joined_rooms = [membership.room for membership in memberships if membership.room.creator_id != profile.pk]
+        recent_messages = Message.objects.filter(sender=profile).select_related("room").order_by("-created_at")[:5]
+        notifications = Notification.objects.filter(recipient=profile).select_related("actor", "room").order_by("-created_at")[:5]
+
+        context.update(
+            {
+                "profile": profile,
+                "created_rooms": created_rooms,
+                "joined_rooms": joined_rooms,
+                "recent_messages": recent_messages,
+                "notifications": notifications,
+                "unread_notifications_count": Notification.objects.filter(recipient=profile, is_read=False).count(),
+            }
+        )
+        return context

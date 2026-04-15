@@ -7,8 +7,11 @@
     <h2>{{ profile.nickname }}</h2>
     <p>{{ profile.bio|default:"No bio provided." }}</p>
 
-    <a href="{% url 'profile_edit' profile.pk %}" class="btn btn-primary">Edit</a>
-    <a href="{% url 'profile_delete' profile.pk %}" class="btn btn-danger">Delete</a>
+    {% if user.is_authenticated and user.profile == profile %}
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">Dashboard</a>
+        <a href="{% url 'profile_edit' profile.pk %}" class="btn btn-primary">Edit</a>
+        <a href="{% url 'profile_delete' profile.pk %}" class="btn btn-danger">Delete</a>
+    {% endif %}
     <a href="{% url 'profile_list' %}" class="btn btn-secondary">Back to Profiles</a>
 </div>
 {% endblock %}
