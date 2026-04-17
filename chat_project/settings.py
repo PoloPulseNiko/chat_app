@@ -113,18 +113,22 @@ TEMPLATES = [
 
 conn = os.getenv("AZURE_POSTGRESQL_CONNECTIONSTRING")
 
-parsed = urlparse(conn)
-qs = parse_qs(parsed.query)
+if not conn:
+    raise Exception("AZURE_POSTGRESQL_CONNECTIONSTRING is missing in Azure App Settings")
+
+url = urlparse(conn)
 
 DATABASES = {
-        "default": {
+    "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME"),
-        "USER": os.getenv("DB_USER"),
-        "PASSWORD": os.getenv("DB_PASSWORD"),
-        "HOST": os.getenv("DB_HOST"),
-        "PORT": os.getenv("DB_PORT", "5432"),
-        "OPTIONS": {"sslmode": "require"},
+        "NAME": url.path.lstrip("/"),
+        "USER": url.username,
+        "PASSWORD": url.password,
+        "HOST": url.hostname,
+        "PORT": url.port or 5432,
+        "OPTIONS": {
+            "sslmode": "require",
+        },
     }
 }
 
