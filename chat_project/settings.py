@@ -130,41 +130,16 @@ WSGI_APPLICATION = 'chat_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-azure_connection_string = os.getenv("AZURE_POSTGRESQL_CONNECTIONSTRING", "")
-parsed_connection = urlparse(azure_connection_string) if azure_connection_string else None
-connection_options = (
-    parse_qs(parsed_connection.query) if parsed_connection and parsed_connection.query else {}
-)
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv(
-            "DB_NAME",
-            parsed_connection.path.lstrip("/") if parsed_connection and parsed_connection.path else "chat_app",
-        ),
-        "USER": os.getenv(
-            "DB_USER",
-            parsed_connection.username if parsed_connection and parsed_connection.username else "",
-        ),
-        "PASSWORD": os.getenv(
-            "DB_PASSWORD",
-            parsed_connection.password if parsed_connection and parsed_connection.password else "",
-        ),
-        "HOST": os.getenv(
-            "DB_HOST",
-            parsed_connection.hostname if parsed_connection and parsed_connection.hostname else "127.0.0.1",
-        ),
-        "PORT": os.getenv(
-            "DB_PORT",
-            str(parsed_connection.port) if parsed_connection and parsed_connection.port else "5432",
-        ),
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv("DB_HOST", "127.0.0.1"),
+        "PORT": os.getenv("DB_PORT", "5432"),
         "OPTIONS": {
-            "connect_timeout": int(os.getenv("DB_CONNECT_TIMEOUT", "10")),
-            "sslmode": os.getenv(
-                "DB_SSLMODE",
-                connection_options.get("sslmode", ["require"])[0],
-            ),
+            "sslmode": os.getenv("DB_SSLMODE", "require"),
         },
     }
 }
