@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 import os
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,23 +27,23 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-dev-key")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = [
-    host.strip()
-    for host in os.getenv(
+def _split_csv(value: str) -> list[str]:
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+ALLOWED_HOSTS = _split_csv(
+    os.getenv(
         "DJANGO_ALLOWED_HOSTS",
         "127.0.0.1,localhost,ntchat-gve8eseuhqf0f4hg.switzerlandnorth-01.azurewebsites.net",
-    ).split(",")
-    if host.strip()
-]
+    )
+)
 
-CSRF_TRUSTED_ORIGINS = [
-    origin.strip()
-    for origin in os.getenv(
+CSRF_TRUSTED_ORIGINS = _split_csv(
+    os.getenv(
         "DJANGO_CSRF_TRUSTED_ORIGINS",
         "https://ntchat-gve8eseuhqf0f4hg.switzerlandnorth-01.azurewebsites.net",
-    ).split(",")
-    if origin.strip()
-]
+    )
+)
 
 azure_hostname = os.getenv("WEBSITE_HOSTNAME")
 if azure_hostname and azure_hostname not in ALLOWED_HOSTS:
@@ -108,16 +109,40 @@ WSGI_APPLICATION = 'chat_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+azure_connection_string = os.getenv("AZURE_POSTGRESQL_CONNECTIONSTRING", "")
+parsed_connection = urlparse(azure_connection_string) if azure_connection_string else None
+connection_options = (
+    parse_qs(parsed_connection.query) if parsed_connection and parsed_connection.query else {}
+)
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME", "chat_app"),
-        "USER": os.getenv("DB_USER", "postgres-user"),
-        "PASSWORD": os.getenv("DB_PASSWORD", "password"),
-        "HOST": os.getenv("DB_HOST", "127.0.0.1"),
-        "PORT": os.getenv("DB_PORT", "5432"),
+        "NAME": os.getenv(
+            "DB_NAME",
+            parsed_connection.path.lstrip("/") if parsed_connection and parsed_connection.path else "ntchat-database",
+        ),
+        "USER": os.getenv(
+            "DB_USER",
+            parsed_connection.username if parsed_connection and parsed_connection.username else "SHRNiko",
+        ),
+        "PASSWORD": os.getenv(
+            "DB_PASSWORD",
+            parsed_connection.password if parsed_connection and parsed_connection.password else "",
+        ),
+        "HOST": os.getenv(
+            "DB_HOST",
+            parsed_connection.hostname if parsed_connection and parsed_connection.hostname else "ntchat-server.postgres.database.azure.com",
+        ),
+        "PORT": os.getenv(
+            "DB_PORT",
+            str(parsed_connection.port) if parsed_connection and parsed_connection.port else "5432",
+        ),
         "OPTIONS": {
-            "sslmode": os.getenv("DB_SSLMODE", "require"),
+            "sslmode": os.getenv(
+                "DB_SSLMODE",
+                connection_options.get("sslmode", ["require"])[0],
+            ),
         },
     }
 }
@@ -170,6 +195,9 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_SSL_REDIRECT = not DEBUG and bool(azure_hostname)
 
 AUTH_USER_MODEL = "accounts_app.ChatUser"
 LOGIN_REDIRECT_URL = "room_list"
