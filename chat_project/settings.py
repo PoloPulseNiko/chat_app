@@ -4,6 +4,7 @@ Django settings for chat_project project.
 
 import os
 from pathlib import Path
+from urllib.parse import urlparse, parse_qs
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,7 +25,7 @@ def split_csv(value: str) -> list[str]:
 ALLOWED_HOSTS = split_csv(
     os.getenv(
         "DJANGO_ALLOWED_HOSTS",
-        "127.0.0.1,localhost",
+        "ntchat-gve8eseuhqf0f4hg.switzerlandnorth-01.azurewebsites.net",
     )
 )
 
@@ -110,20 +111,24 @@ TEMPLATES = [
 # DATABASE (AZURE POSTGRES ONLY VIA ENV VARS)
 # -------------------------------------------------
 
+conn = os.getenv("AZURE_POSTGRESQL_CONNECTIONSTRING")
+
+parsed = urlparse(conn)
+qs = parse_qs(parsed.query)
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME"),
-        "USER": os.getenv("DB_USER"),
-        "PASSWORD": os.getenv("DB_PASSWORD"),
-        "HOST": os.getenv("DB_HOST"),
-        "PORT": os.getenv("DB_PORT", "5432"),
+        "NAME": parsed.path.lstrip("/"),
+        "USER": parsed.username,
+        "PASSWORD": parsed.password,
+        "HOST": parsed.hostname,
+        "PORT": parsed.port or 5432,
         "OPTIONS": {
-            "sslmode": os.getenv("DB_SSLMODE", "require"),
+            "sslmode": qs.get("sslmode", ["require"])[0],
         },
     }
 }
-
 
 # -------------------------------------------------
 # PASSWORD VALIDATION
