@@ -141,11 +141,11 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.getenv(
             "DB_NAME",
-            parsed_connection.path.lstrip("/") if parsed_connection and parsed_connection.path else "ntchat-database",
+            parsed_connection.path.lstrip("/") if parsed_connection and parsed_connection.path else "chat_app",
         ),
         "USER": os.getenv(
             "DB_USER",
-            parsed_connection.username if parsed_connection and parsed_connection.username else "user@SHRNiko",
+            parsed_connection.username if parsed_connection and parsed_connection.username else "",
         ),
         "PASSWORD": os.getenv(
             "DB_PASSWORD",
@@ -153,7 +153,7 @@ DATABASES = {
         ),
         "HOST": os.getenv(
             "DB_HOST",
-            parsed_connection.hostname if parsed_connection and parsed_connection.hostname else "nt-server.postgres.database.azure.com",
+            parsed_connection.hostname if parsed_connection and parsed_connection.hostname else "127.0.0.1",
         ),
         "PORT": os.getenv(
             "DB_PORT",
