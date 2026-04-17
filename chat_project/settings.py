@@ -112,29 +112,41 @@ TEMPLATES = [
 # DATABASE (AZURE POSTGRES ONLY VIA ENV VARS)
 # -------------------------------------------------
 
-conn = (
-    os.getenv("AZURE_POSTGRESQL_CONNECTIONSTRING")
-    or os.getenv("POSTGRESQLCONNSTR_postgres")
-    or os.getenv("POSTGRESQLCONNSTR_db")
-    or os.getenv("POSTGRESQLCONNSTR_default")
-)
+conn = os.getenv("AZURE_POSTGRESQL_CONNECTIONSTRING")
 
 if not conn:
-    raise Exception("No Postgres connection string found in Azure App Settings")
+    raise Exception("AZURE_POSTGRESQL_CONNECTIONSTRING is missing in Azure App Settings")
 
-url = urlparse(conn)
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": url.path.lstrip("/"),
-        "USER": url.username,
-        "PASSWORD": url.password,
-        "HOST": url.hostname,
-        "PORT": url.port or 5432,
-        "OPTIONS": {"sslmode": "require"},
+# Azure Flexible Server uses keyword-based connection strings
+if conn.startswith("dbname="):
+    parts = dict(item.split("=", 1) for item in conn.split())
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": parts.get("dbname"),
+            "USER": parts.get("user"),
+            "PASSWORD": parts.get("password"),
+            "HOST": parts.get("host"),
+            "PORT": parts.get("port", 5432),
+            "OPTIONS": {"sslmode": parts.get("sslmode", "require")},
+        }
     }
-}
+
+else:
+    # URL-style fallback
+    url = urlparse(conn)
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": url.path.lstrip("/"),
+            "USER": url.username,
+            "PASSWORD": url.password,
+            "HOST": url.hostname,
+            "PORT": url.port or 5432,
+            "OPTIONS": {"sslmode": "require"},
+        }
+    }
+
 
 # -------------------------------------------------
 # PASSWORD VALIDATION
