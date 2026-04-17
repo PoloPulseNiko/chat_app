@@ -9,9 +9,28 @@
         <p class="text-muted mb-0">Unread notifications: {{ unread_count }}</p>
     </div>
     {% if notifications %}
-        <a href="{% url 'notification_mark_all_read' %}" class="btn btn-outline-primary">Mark all as read</a>
+        <form action="{% url 'notification_mark_all_read' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-primary">Mark all as read</button>
+        </form>
     {% endif %}
 </div>
+
+<form method="get" class="row g-3 mb-4">
+    <div class="col-md-4">
+        {{ filter_form.notification_type.label_tag }}
+        {{ filter_form.notification_type }}
+    </div>
+    <div class="col-md-4 d-flex align-items-end">
+        <div class="form-check">
+            {{ filter_form.unread_only }}
+            {{ filter_form.unread_only.label_tag }}
+        </div>
+    </div>
+    <div class="col-md-4 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary">Filter Notifications</button>
+    </div>
+</form>
 
 {% if notifications %}
     <div class="list-group">
@@ -23,7 +42,10 @@
                         <small class="text-muted">{{ notification.created_at }}</small>
                     </div>
                     {% if not notification.is_read %}
-                        <a href="{% url 'notification_mark_read' notification.pk %}" class="btn btn-sm btn-primary">Mark read</a>
+                        <form action="{% url 'notification_mark_read' notification.pk %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-primary">Mark read</button>
+                        </form>
                     {% endif %}
                 </div>
             </div>

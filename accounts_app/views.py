@@ -1,21 +1,22 @@
 from django.contrib.auth import login
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
+from django.views.generic import FormView
 
 from .forms import SignUpForm
 
 
-def signup(request):
-    if request.user.is_authenticated:
-        return redirect("room_list")
+class SignUpView(FormView):
+    template_name = "registration/signup.html"
+    form_class = SignUpForm
+    success_url = reverse_lazy("room_list")
 
-    if request.method == "POST":
-        form = SignUpForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
             return redirect("room_list")
-    else:
-        form = SignUpForm()
+        return super().dispatch(request, *args, **kwargs)
 
-    return render(request, "registration/signup.html", {"form": form})
-
+    def form_valid(self, form):
+        user = form.save()
+        login(self.request, user)
+        return super().form_valid(form)

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load chat_tags %}
 
 {% block title %}Room: {{ room.name }}{% endblock %}
 
@@ -12,6 +13,14 @@
         <p class="text-muted">Created by: {{ room.creator.nickname }}</p>
         {% if room.category %}
           <p class="text-muted mb-1">Category: {{ room.category.name }}</p>
+        {% endif %}
+        {% if room.tags.exists %}
+          <p class="text-muted mb-1">
+            Tags:
+            {% for tag in room.tags.all %}
+              <span class="badge bg-secondary">{{ tag.name }}</span>
+            {% endfor %}
+          </p>
         {% endif %}
         <p class="text-muted mb-0">Members: {{ room.members.count }}</p>
       </div>
@@ -45,11 +54,19 @@
         <p>{{ message.text }}</p>
         {% if message.reactions.exists %}
           <p class="mb-2 text-muted small">
-            Reactions:
-            {% for reaction in message.reactions.all %}
-              <span class="me-2">{{ reaction.get_reaction_type_display }} by {{ reaction.profile.nickname }}</span>
-            {% endfor %}
+            Reactions: Like {{ message|reaction_count:"like" }}, Love {{ message|reaction_count:"love" }}, Laugh {{ message|reaction_count:"laugh" }}
           </p>
+        {% endif %}
+
+        {% if user.is_authenticated and is_member %}
+          <div class="d-flex gap-2 mb-2">
+            {% for reaction_value, reaction_label in reaction_choices %}
+              <form action="{% url 'message_react' message.pk reaction_value %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-primary">{{ reaction_label }}</button>
+              </form>
+            {% endfor %}
+          </div>
         {% endif %}
 
         {% if user.is_authenticated and message.sender == user.profile %}

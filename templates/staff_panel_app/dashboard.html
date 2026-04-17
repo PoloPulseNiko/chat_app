@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Staff Dashboard</h2>
+            <p class="text-muted mb-0">Private monitoring area for administrators and staff members.</p>
+        </div>
+        <a href="{% url 'admin:index' %}" class="btn btn-outline-dark">Open Django Admin</a>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Users</h6>
+                    <p class="display-6 mb-0">{{ user_count }}</p>
+                    <small class="text-muted">Profiles: {{ profile_count }}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Rooms</h6>
+                    <p class="display-6 mb-0">{{ room_count }}</p>
+                    <small class="text-muted">Categories: {{ category_count }}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Messages</h6>
+                    <p class="display-6 mb-0">{{ message_count }}</p>
+                    <small class="text-muted">Reactions: {{ reaction_count }}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Notifications</h6>
+                    <p class="display-6 mb-0">{{ notification_count }}</p>
+                    <small class="text-muted">Unread: {{ unread_notification_count }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4 class="card-title">Broadcast Room Notification</h4>
+            <form method="post" action="{% url 'staff_broadcast' %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    {{ broadcast_form.room.label_tag }}
+                    {{ broadcast_form.room }}
+                    {{ broadcast_form.room.errors }}
+                </div>
+                <div class="mb-3">
+                    {{ broadcast_form.text.label_tag }}
+                    {{ broadcast_form.text }}
+                    {{ broadcast_form.text.errors }}
+                </div>
+                <button type="submit" class="btn btn-primary">Send Broadcast</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h4 class="card-title">Recent Users</h4>
+                    {% if recent_users %}
+                        <div class="list-group list-group-flush">
+                            {% for recent_user in recent_users %}
+                                <div class="list-group-item px-0">
+                                    <strong>{{ recent_user.username }}</strong>
+                                    <div class="text-muted small">{{ recent_user.email }}</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No users available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h4 class="card-title">Recent Rooms</h4>
+                    {% if recent_rooms %}
+                        <div class="list-group list-group-flush">
+                            {% for room in recent_rooms %}
+                                <div class="list-group-item px-0">
+                                    <strong>{{ room.name }}</strong>
+                                    <div class="text-muted small">
+                                        {{ room.creator.nickname }}
+                                        {% if room.category %} | {{ room.category.name }}{% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No rooms available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h4 class="card-title">Recent Messages</h4>
+                    {% if recent_messages %}
+                        <div class="list-group list-group-flush">
+                            {% for message in recent_messages %}
+                                <div class="list-group-item px-0">
+                                    <strong>{{ message.sender.nickname }}</strong> in {{ message.room.name }}
+                                    <div class="text-muted small">{{ message.text|truncatewords:10 }}</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No messages available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h4 class="card-title">Recent Notifications</h4>
+                    {% if recent_notifications %}
+                        <div class="list-group list-group-flush">
+                            {% for notification in recent_notifications %}
+                                <div class="list-group-item px-0">
+                                    <strong>{{ notification.recipient.nickname }}</strong>
+                                    <div class="text-muted small">{{ notification.text }}</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No notifications available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

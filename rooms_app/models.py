@@ -13,6 +13,16 @@ class Category(models.Model):
         return self.name
 
 
+class Tag(models.Model):
+    name = models.CharField(max_length=30, unique=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
 class Room(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
@@ -25,6 +35,7 @@ class Room(models.Model):
         blank=True,
     )
     members = models.ManyToManyField("profiles_app.Profile", related_name="rooms")
+    tags = models.ManyToManyField(Tag, related_name="rooms", blank=True)
 
     def __str__(self):
         return self.name

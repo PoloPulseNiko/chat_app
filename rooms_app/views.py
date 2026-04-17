@@ -6,9 +6,9 @@ from django.views.generic import CreateView, DeleteView, DetailView, ListView, U
 
 from messages_app.forms import MessageForm
 from notifications_app.services import create_message_notifications, create_room_notifications
-from profiles_app.models import Profile
 
-from .forms import RoomForm
+from .api_views import RoomDetailAPIView, RoomListAPIView, RoomMessagesAPIView
+from .forms import RoomFilterForm, RoomForm
 from .models import Membership, Room
 
 
@@ -24,7 +24,26 @@ class RoomListView(ListView):
     context_object_name = "rooms"
 
     def get_queryset(self):
-        return Room.objects.select_related("creator", "category").prefetch_related("members")
+        queryset = Room.objects.select_related("creator", "category").prefetch_related("members", "tags")
+        self.filter_form = RoomFilterForm(self.request.GET or None)
+        if self.filter_form.is_valid():
+            search = self.filter_form.cleaned_data.get("search")
+            category = self.filter_form.cleaned_data.get("category")
+            tag = self.filter_form.cleaned_data.get("tag")
+            sort = self.filter_form.cleaned_data.get("sort") or "name"
+            if search:
+                queryset = queryset.filter(name__icontains=search)
+            if category:
+                queryset = queryset.filter(category=category)
+            if tag:
+                queryset = queryset.filter(tags=tag)
+            queryset = queryset.order_by(sort).distinct()
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["filter_form"] = self.filter_form
+        return context
 
 
 class RoomDetailView(DetailView):
@@ -50,6 +69,11 @@ class RoomDetailView(DetailView):
         context["is_member"] = is_member
         context["can_manage_room"] = bool(user_profile and room.creator_id == user_profile.pk)
         context["can_post_message"] = is_member
+        context["reaction_choices"] = [
+            ("like", "Like"),
+            ("love", "Love"),
+            ("laugh", "Laugh"),
+        ]
         return context
 
     def post(self, request, *args, **kwargs):
@@ -82,6 +106,7 @@ class RoomCreateView(LoginRequiredMixin, CreateView):
         room = form.save(commit=False)
         room.creator = self.request.user.profile
         room.save()
+        form.save_m2m()
         room.members.add(room.creator)
         Membership.objects.get_or_create(profile=room.creator, room=room)
         return redirect("room_list")

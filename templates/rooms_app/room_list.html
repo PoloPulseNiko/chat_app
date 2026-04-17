@@ -10,12 +10,42 @@
         <a href="{% url 'room_create' %}" class="btn btn-success mb-3">Create New Room</a>
     {% endif %}
 
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-4">
+            {{ filter_form.search.label_tag }}
+            {{ filter_form.search }}
+            {{ filter_form.search.errors }}
+        </div>
+        <div class="col-md-3">
+            {{ filter_form.category.label_tag }}
+            {{ filter_form.category }}
+        </div>
+        <div class="col-md-3">
+            {{ filter_form.tag.label_tag }}
+            {{ filter_form.tag }}
+        </div>
+        <div class="col-md-2">
+            {{ filter_form.sort.label_tag }}
+            {{ filter_form.sort }}
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Filter Rooms</button>
+        </div>
+    </form>
+
     <div class="list-group">
         {% for room in rooms %}
             <a href="{% url 'room_detail' room.pk %}" class="list-group-item list-group-item-action">
                 <h5 class="mb-1">{{ room.name }}</h5>
                 <small class="text-muted">Created by {{ room.creator.nickname }}</small>
                 <p class="mb-1">{{ room.description|truncatewords:15 }}</p>
+                {% if room.tags.exists %}
+                    <small class="text-muted">Tags:
+                        {% for tag in room.tags.all %}
+                            {{ tag.name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </small>
+                {% endif %}
             </a>
         {% empty %}
             <p class="text-muted">No rooms available yet.</p>

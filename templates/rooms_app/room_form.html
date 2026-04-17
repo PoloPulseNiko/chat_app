@@ -23,6 +23,11 @@
             {{ form.category }}
             {{ form.category.errors }}
         </div>
+        <div class="mb-3">
+            {{ form.tags.label_tag }}
+            {{ form.tags }}
+            {{ form.tags.errors }}
+        </div>
         <button type="submit" class="btn btn-primary">{% if form.instance.pk %}Update Room{% else %}Create Room{% endif %}</button>
         <a href="{% if form.instance.pk %}{% url 'room_detail' form.instance.pk %}{% else %}{% url 'room_list' %}{% endif %}" class="btn btn-secondary">Cancel</a>
     </form>
