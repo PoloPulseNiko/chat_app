@@ -144,7 +144,7 @@ DATABASES = {
         ),
         "USER": os.getenv(
             "DB_USER",
-            parsed_connection.username if parsed_connection and parsed_connection.username else "SHRNiko",
+            parsed_connection.username if parsed_connection and parsed_connection.username else "user@SHRNiko",
         ),
         "PASSWORD": os.getenv(
             "DB_PASSWORD",
