@@ -25,7 +25,7 @@ def split_csv(value: str) -> list[str]:
 ALLOWED_HOSTS = split_csv(
     os.getenv(
         "DJANGO_ALLOWED_HOSTS",
-        "ntchat-gve8eseuhqf0f4hg.switzerlandnorth-01.azurewebsites.net",
+        "ntchat.azurewebsites.net",
     )
 )
 
@@ -116,25 +116,17 @@ conn = os.getenv("AZURE_POSTGRESQL_CONNECTIONSTRING")
 parsed = urlparse(conn)
 qs = parse_qs(parsed.query)
 
-if os.getenv("DISABLE_DB", "false") == "true":
-    DATABASES = {
+DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv("DB_HOST"),
+        "PORT": os.getenv("DB_PORT", "5432"),
+        "OPTIONS": {"sslmode": "require"},
     }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.getenv("DB_NAME"),
-            "USER": os.getenv("DB_USER"),
-            "PASSWORD": os.getenv("DB_PASSWORD"),
-            "HOST": os.getenv("DB_HOST"),
-            "PORT": os.getenv("DB_PORT", "5432"),
-            "OPTIONS": {"sslmode": "require"},
-        }
-    }
+}
 
 # -------------------------------------------------
 # PASSWORD VALIDATION
