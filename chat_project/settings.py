@@ -159,6 +159,7 @@ DATABASES = {
             str(parsed_connection.port) if parsed_connection and parsed_connection.port else "5432",
         ),
         "OPTIONS": {
+            "connect_timeout": int(os.getenv("DB_CONNECT_TIMEOUT", "10")),
             "sslmode": os.getenv(
                 "DB_SSLMODE",
                 connection_options.get("sslmode", ["require"])[0],
