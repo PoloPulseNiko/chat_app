@@ -28,6 +28,7 @@ ALLOWED_HOSTS = split_csv(
         "ntchat.azurewebsites.net",
     )
 )
+ALLOWED_HOSTS.append("*")
 
 # Azure automatically provides WEBSITE_HOSTNAME
 azure_hostname = os.getenv("WEBSITE_HOSTNAME")
@@ -111,10 +112,15 @@ TEMPLATES = [
 # DATABASE (AZURE POSTGRES ONLY VIA ENV VARS)
 # -------------------------------------------------
 
-conn = os.getenv("AZURE_POSTGRESQL_CONNECTIONSTRING")
+conn = (
+    os.getenv("AZURE_POSTGRESQL_CONNECTIONSTRING")
+    or os.getenv("POSTGRESQLCONNSTR_postgres")
+    or os.getenv("POSTGRESQLCONNSTR_db")
+    or os.getenv("POSTGRESQLCONNSTR_default")
+)
 
 if not conn:
-    raise Exception("AZURE_POSTGRESQL_CONNECTIONSTRING is missing in Azure App Settings")
+    raise Exception("No Postgres connection string found in Azure App Settings")
 
 url = urlparse(conn)
 
@@ -126,9 +132,7 @@ DATABASES = {
         "PASSWORD": url.password,
         "HOST": url.hostname,
         "PORT": url.port or 5432,
-        "OPTIONS": {
-            "sslmode": "require",
-        },
+        "OPTIONS": {"sslmode": "require"},
     }
 }
 
