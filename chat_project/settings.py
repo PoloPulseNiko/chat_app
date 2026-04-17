@@ -116,19 +116,25 @@ conn = os.getenv("AZURE_POSTGRESQL_CONNECTIONSTRING")
 parsed = urlparse(conn)
 qs = parse_qs(parsed.query)
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": parsed.path.lstrip("/"),
-        "USER": parsed.username,
-        "PASSWORD": parsed.password,
-        "HOST": parsed.hostname,
-        "PORT": parsed.port or 5432,
-        "OPTIONS": {
-            "sslmode": qs.get("sslmode", ["require"])[0],
-        },
+if os.getenv("DISABLE_DB", "false") == "true":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("DB_NAME"),
+            "USER": os.getenv("DB_USER"),
+            "PASSWORD": os.getenv("DB_PASSWORD"),
+            "HOST": os.getenv("DB_HOST"),
+            "PORT": os.getenv("DB_PORT", "5432"),
+            "OPTIONS": {"sslmode": "require"},
+        }
+    }
 
 # -------------------------------------------------
 # PASSWORD VALIDATION
