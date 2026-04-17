@@ -10,4 +10,6 @@ def reaction_count(message, reaction_type):
 
 @register.filter
 def unread_notifications_count(profile):
+    if not profile:
+        return 0
     return profile.notifications.filter(is_read=False).count()

@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from django.views import View
 from django.views.generic import TemplateView
 
+from accounts_app.services import ensure_user_profile
 from accounts_app.models import ChatUser
 from messages_app.models import Message, Reaction
 from notifications_app.models import Notification
@@ -50,7 +51,7 @@ class StaffBroadcastView(StaffRequiredMixin, View):
         if form.is_valid():
             create_broadcast_notifications(
                 room=form.cleaned_data["room"],
-                actor=request.user.profile,
+                actor=ensure_user_profile(request.user),
                 text=form.cleaned_data["text"],
             )
             return redirect("staff_dashboard")

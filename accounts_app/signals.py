@@ -3,6 +3,8 @@ from django.contrib.auth.models import Group, Permission
 from django.db.models.signals import post_migrate, post_save
 from django.dispatch import receiver
 
+from .services import build_unique_nickname
+
 
 UserModel = get_user_model()
 
@@ -13,14 +15,7 @@ def create_profile_for_new_user(sender, instance, created, **kwargs):
         from profiles_app.models import Profile
 
         base_nickname = instance.display_name or instance.username
-        nickname = base_nickname
-        counter = 1
-
-        while Profile.objects.filter(nickname=nickname).exists():
-            counter += 1
-            nickname = f"{base_nickname}-{counter}"
-
-        Profile.objects.create(user=instance, nickname=nickname)
+        Profile.objects.create(user=instance, nickname=build_unique_nickname(base_nickname))
 
 
 @receiver(post_migrate)
@@ -40,4 +35,3 @@ def create_default_groups(sender, **kwargs):
 
     moderator_group.permissions.set(moderator_permissions)
     room_manager_group.permissions.set(room_manager_permissions)
-

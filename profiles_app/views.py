@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
 
+from accounts_app.services import ensure_user_profile
 from messages_app.models import Message
 from notifications_app.models import Notification
 from rooms_app.models import Membership, Room
@@ -35,8 +36,9 @@ class ProfileCreateView(LoginRequiredMixin, CreateView):
     template_name = "profiles_app/profile_form.html"
 
     def dispatch(self, request, *args, **kwargs):
-        if hasattr(request.user, "profile"):
-            return redirect("profile_edit", pk=request.user.profile.pk)
+        profile = ensure_user_profile(request.user)
+        if profile:
+            return redirect("profile_edit", pk=profile.pk)
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -72,7 +74,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        profile = self.request.user.profile
+        profile = ensure_user_profile(self.request.user)
 
         created_rooms = Room.objects.filter(creator=profile).select_related("category")
         memberships = Membership.objects.filter(profile=profile).select_related("room", "room__category")

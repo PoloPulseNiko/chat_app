@@ -4,6 +4,8 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import DeleteView, UpdateView
 
+from accounts_app.services import ensure_user_profile
+
 from .forms import MessageForm
 from .models import Message, Reaction
 
@@ -11,7 +13,8 @@ from .models import Message, Reaction
 class MessageAuthorRequiredMixin(UserPassesTestMixin):
     def test_func(self):
         message = self.get_object()
-        return self.request.user.is_authenticated and message.sender == self.request.user.profile
+        profile = ensure_user_profile(self.request.user)
+        return bool(profile and message.sender == profile)
 
 
 class MessageUpdateView(LoginRequiredMixin, MessageAuthorRequiredMixin, UpdateView):
@@ -34,7 +37,7 @@ class MessageDeleteView(LoginRequiredMixin, MessageAuthorRequiredMixin, DeleteVi
 class MessageReactionToggleView(LoginRequiredMixin, View):
     def post(self, request, pk, reaction_type):
         message = get_object_or_404(Message, pk=pk)
-        profile = request.user.profile
+        profile = ensure_user_profile(request.user)
         valid_reactions = {choice[0] for choice in Reaction.REACTION_CHOICES}
 
         if reaction_type not in valid_reactions:

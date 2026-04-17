@@ -69,7 +69,7 @@
           </div>
         {% endif %}
 
-        {% if user.is_authenticated and message.sender == user.profile %}
+        {% if user.is_authenticated and current_profile and message.sender == current_profile %}
           <a href="{% url 'message_edit' message.pk %}" class="btn btn-sm btn-warning">Edit</a>
           <a href="{% url 'message_delete' message.pk %}" class="btn btn-sm btn-danger">Delete</a>
         {% endif %}

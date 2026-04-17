@@ -4,6 +4,7 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
+from accounts_app.services import ensure_user_profile
 from messages_app.forms import MessageForm
 from notifications_app.services import create_message_notifications, create_room_notifications
 
@@ -15,7 +16,8 @@ from .models import Membership, Room
 class RoomOwnerRequiredMixin(UserPassesTestMixin):
     def test_func(self):
         room = self.get_object()
-        return self.request.user.is_authenticated and room.creator == self.request.user.profile
+        profile = ensure_user_profile(self.request.user)
+        return bool(profile and room.creator == profile)
 
 
 class RoomListView(ListView):
@@ -61,7 +63,7 @@ class RoomDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         room = self.object
-        user_profile = getattr(self.request.user, "profile", None)
+        user_profile = ensure_user_profile(self.request.user)
         is_member = bool(user_profile and room.members.filter(pk=user_profile.pk).exists())
 
         context["messages"] = room.messages.select_related("sender").prefetch_related("reactions__profile")
@@ -80,13 +82,14 @@ class RoomDetailView(DetailView):
         self.object = self.get_object()
         if not request.user.is_authenticated:
             return redirect("login")
-        if not self.object.members.filter(pk=request.user.profile.pk).exists():
+        profile = ensure_user_profile(request.user)
+        if not profile or not self.object.members.filter(pk=profile.pk).exists():
             return redirect("room_detail", pk=self.object.pk)
 
         form = MessageForm(request.POST)
         if form.is_valid():
             message = form.save(commit=False)
-            message.sender = request.user.profile
+            message.sender = profile
             message.room = self.object
             message.save()
             create_message_notifications(message)
@@ -104,7 +107,7 @@ class RoomCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         room = form.save(commit=False)
-        room.creator = self.request.user.profile
+        room.creator = ensure_user_profile(self.request.user)
         room.save()
         form.save_m2m()
         room.members.add(room.creator)
@@ -135,7 +138,7 @@ class RoomDeleteView(LoginRequiredMixin, RoomOwnerRequiredMixin, DeleteView):
 class RoomJoinView(LoginRequiredMixin, View):
     def post(self, request, pk):
         room = get_object_or_404(Room, pk=pk)
-        profile = request.user.profile
+        profile = ensure_user_profile(request.user)
 
         room.members.add(profile)
         Membership.objects.get_or_create(profile=profile, room=room)
@@ -145,7 +148,7 @@ class RoomJoinView(LoginRequiredMixin, View):
 class RoomLeaveView(LoginRequiredMixin, View):
     def post(self, request, pk):
         room = get_object_or_404(Room, pk=pk)
-        profile = request.user.profile
+        profile = ensure_user_profile(request.user)
 
         if room.creator_id != profile.pk:
             room.members.remove(profile)
