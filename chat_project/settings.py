@@ -152,7 +152,7 @@ DATABASES = {
         ),
         "HOST": os.getenv(
             "DB_HOST",
-            parsed_connection.hostname if parsed_connection and parsed_connection.hostname else "ntchat-server.postgres.database.azure.com",
+            parsed_connection.hostname if parsed_connection and parsed_connection.hostname else "nt-server.postgres.database.azure.com",
         ),
         "PORT": os.getenv(
             "DB_PORT",
