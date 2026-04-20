@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}About NTChat{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="mx-auto" style="max-width: 850px;">
+        <h1 class="mb-3">About NTChat</h1>
+        <p class="lead text-muted">
+            NTChat is a community-focused chat platform where users can discover topic-based rooms, join conversations,
+            react to messages, and stay connected through profile-driven interaction.
+            It started off as a project of two friends, we'll call them M and N. The idea was to make a lightweight messaging platform that could run smoothly on old Blackberry phones as both M and N are major fans of these devices.
+            Unfortunately life got in the way of both of them before they could even start. Then N had to make a university project.
+        </p>
+
+        <div class="row g-4 mt-2">
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h2 class="h5">What the platform offers</h2>
+                        <p class="mb-0 text-muted">
+                            Public browsing, private dashboards, room membership, message reactions, notifications, and
+                            a staff panel for moderation and overview tasks.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h2 class="h5">Who it is for</h2>
+                        <p class="mb-0 text-muted">
+                            Anyone who wants to join topic-centered conversations, create their own discussion spaces,
+                            and participate in a more organized chat experience.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4 border-0 bg-light">
+            <div class="card-body">
+                <h2 class="h5">Core flow</h2>
+                <p class="mb-2">A typical user journey looks like this:</p>
+                <ol class="mb-0">
+                    <li>Create an account and get an automatic profile.</li>
+                    <li>Browse rooms by category or tag.</li>
+                    <li>Join rooms and take part in message discussions.</li>
+                    <li>React to messages and monitor updates through notifications.</li>
+                    <li>Manage rooms, profile details, and activity from the private dashboard.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

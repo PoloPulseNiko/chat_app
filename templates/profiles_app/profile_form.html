@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container mt-4">
     <h2>{{ form.instance.pk|yesno:"Edit Profile,Create Profile" }}</h2>
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.non_field_errors }}
         <div class="mb-3">
@@ -17,6 +17,12 @@
             {{ form.bio.label_tag }}
             {{ form.bio }}
             {{ form.bio.errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.avatar.label_tag }}
+            {{ form.avatar }}
+            {{ form.avatar.help_text }}
+            {{ form.avatar.errors }}
         </div>
         <button type="submit" class="btn btn-primary">Save</button>
         <a href="{% url 'profile_list' %}" class="btn btn-secondary">Cancel</a>

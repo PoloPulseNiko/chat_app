@@ -11,6 +11,7 @@ class Profile(models.Model):
     )
     nickname = models.CharField(max_length=30, unique=True)
     bio = models.TextField(blank=True)
+    avatar = models.ImageField(upload_to="profile_pictures/", blank=True, null=True)
 
     def clean(self):
         if len(self.nickname) < 3:
