@@ -5,6 +5,11 @@
 
 {% block content %}
 <div class="container mt-4">
+  <div
+    id="room-refresh-config"
+    data-api-url="{% url 'api_room_messages' room.pk %}"
+    data-message-count="{{ messages|length }}"
+  ></div>
   <div class="card mb-4">
     <div class="card-body d-flex justify-content-between align-items-start">
       <div>
@@ -130,4 +135,51 @@
   </div>
 
 </div>
+
+<script>
+  (function () {
+    const refreshConfig = document.getElementById("room-refresh-config");
+    if (!refreshConfig) {
+      return;
+    }
+
+    const apiUrl = refreshConfig.dataset.apiUrl;
+    let knownMessageCount = Number(refreshConfig.dataset.messageCount || 0);
+
+    async function checkForNewMessages() {
+      try {
+        const response = await fetch(apiUrl, {
+          headers: {
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const messages = await response.json();
+        const latestCount = Array.isArray(messages) ? messages.length : knownMessageCount;
+        const activeElement = document.activeElement;
+        const messageField = document.querySelector("textarea[name='text']");
+        const isTypingMessage = Boolean(
+          messageField &&
+          activeElement === messageField &&
+          messageField.value.trim()
+        );
+
+        if (latestCount !== knownMessageCount && !isTypingMessage) {
+          window.location.reload();
+          return;
+        }
+
+        knownMessageCount = latestCount;
+      } catch (error) {
+        console.debug("Room auto-refresh check failed.", error);
+      }
+    }
+
+    window.setInterval(checkForNewMessages, 5000);
+  })();
+</script>
 {% endblock %}
