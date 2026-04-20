@@ -201,8 +201,10 @@ SECURE_SSL_REDIRECT = not DEBUG
 
 AUTH_USER_MODEL = "accounts_app.ChatUser"
 
-LOGIN_REDIRECT_URL = "room_list"
-LOGOUT_REDIRECT_URL = "room_list"
+LOGIN_URL = "/accounts/login/"
+LOGIN_REDIRECT_URL = "/rooms/"
+LOGOUT_REDIRECT_URL = "/"
+
 
 
 # -------------------------------------------------

@@ -24,7 +24,7 @@ def home(request):
 
 
 urlpatterns = [
-    path('', home, name='home'),
+    path("", home, name="home"),
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts_app.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
@@ -33,6 +33,7 @@ urlpatterns = [
     path('profiles/', include('profiles_app.urls')),
     path('messages/', include('messages_app.urls')),  # for delete
     path('staff-panel/', include('staff_panel_app.urls')),
+
 ]
 
 

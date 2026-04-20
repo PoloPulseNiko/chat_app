@@ -12,7 +12,6 @@ from .api_views import RoomDetailAPIView, RoomListAPIView, RoomMessagesAPIView
 from .forms import RoomFilterForm, RoomForm
 from .models import Membership, Room
 
-
 class RoomOwnerRequiredMixin(UserPassesTestMixin):
     def test_func(self):
         room = self.get_object()
@@ -20,26 +19,33 @@ class RoomOwnerRequiredMixin(UserPassesTestMixin):
         return bool(profile and room.creator == profile)
 
 
-class RoomListView(ListView):
+class RoomListView(LoginRequiredMixin, ListView):
     model = Room
     template_name = "rooms_app/room_list.html"
     context_object_name = "rooms"
 
+    login_url = "/accounts/login/"
+    redirect_field_name = "next"
+
     def get_queryset(self):
         queryset = Room.objects.select_related("creator", "category").prefetch_related("members", "tags")
         self.filter_form = RoomFilterForm(self.request.GET or None)
+
         if self.filter_form.is_valid():
             search = self.filter_form.cleaned_data.get("search")
             category = self.filter_form.cleaned_data.get("category")
             tag = self.filter_form.cleaned_data.get("tag")
             sort = self.filter_form.cleaned_data.get("sort") or "name"
+
             if search:
                 queryset = queryset.filter(name__icontains=search)
             if category:
                 queryset = queryset.filter(category=category)
             if tag:
                 queryset = queryset.filter(tags=tag)
+
             queryset = queryset.order_by(sort).distinct()
+
         return queryset
 
     def get_context_data(self, **kwargs):

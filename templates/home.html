@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="max-width: 600px; margin-top: 80px; text-align: center;">
+
+    <h1 class="title">Welcome to ChatPulse</h1>
+    <p class="subtitle">Connect. Chat. Share. All in one place.</p>
+
+    <div style="margin-top: 40px;">
+        <a href="{% url 'login' %}" class="btn btn-primary" style="width: 200px; margin-bottom: 15px;">
+            Login
+        </a>
+        <br>
+        <a href="{% url 'register' %}" class="btn btn-secondary" style="width: 200px;">
+            Create Account
+        </a>
+    </div>
+
+</div>
+{% endblock %}
