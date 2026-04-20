@@ -7,7 +7,7 @@
     <div class="alert alert-danger">
         <h2>Something went wrong</h2>
         <p>Our server hit an unexpected error. Please try again in a moment.</p>
-        <a href="{% url 'room_list' %}" class="btn btn-primary">Back to Home</a>
+        <a href="{% if user.is_authenticated %}{% url 'room_list' %}{% else %}{% url 'home' %}{% endif %}" class="btn btn-primary">Back to Home</a>
     </div>
 </div>
 {% endblock %}
