@@ -181,7 +181,12 @@ STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+if azure_hostname:
+    MEDIA_ROOT = Path("/home/site/wwwroot/media")
+else:
+    MEDIA_ROOT = BASE_DIR / "media"
+
+MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
