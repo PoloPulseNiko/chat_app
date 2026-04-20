@@ -109,41 +109,44 @@ TEMPLATES = [
 
 
 # -------------------------------------------------
-# DATABASE (AZURE POSTGRES ONLY VIA ENV VARS)
+# DATABASE
 # -------------------------------------------------
 
 conn = os.getenv("AZURE_POSTGRESQL_CONNECTIONSTRING")
 
-if not conn:
-    raise Exception("AZURE_POSTGRESQL_CONNECTIONSTRING is missing in Azure App Settings")
-
-# Azure Flexible Server uses keyword-based connection strings
-if conn.startswith("dbname="):
-    parts = dict(item.split("=", 1) for item in conn.split())
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": parts.get("dbname"),
-            "USER": parts.get("user"),
-            "PASSWORD": parts.get("password"),
-            "HOST": parts.get("host"),
-            "PORT": parts.get("port", 5432),
-            "OPTIONS": {"sslmode": parts.get("sslmode", "require")},
+if conn:
+    # Azure Flexible Server often uses keyword-based connection strings.
+    if conn.startswith("dbname="):
+        parts = dict(item.split("=", 1) for item in conn.split())
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.postgresql",
+                "NAME": parts.get("dbname"),
+                "USER": parts.get("user"),
+                "PASSWORD": parts.get("password"),
+                "HOST": parts.get("host"),
+                "PORT": parts.get("port", 5432),
+                "OPTIONS": {"sslmode": parts.get("sslmode", "require")},
+            }
         }
-    }
-
+    else:
+        url = urlparse(conn)
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.postgresql",
+                "NAME": url.path.lstrip("/"),
+                "USER": url.username,
+                "PASSWORD": url.password,
+                "HOST": url.hostname,
+                "PORT": url.port or 5432,
+                "OPTIONS": {"sslmode": "require"},
+            }
+        }
 else:
-    # URL-style fallback
-    url = urlparse(conn)
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": url.path.lstrip("/"),
-            "USER": url.username,
-            "PASSWORD": url.password,
-            "HOST": url.hostname,
-            "PORT": url.port or 5432,
-            "OPTIONS": {"sslmode": "require"},
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
 
