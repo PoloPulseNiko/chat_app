@@ -17,9 +17,10 @@ Including another URLconf
 from django.conf import settings
 from django.contrib import admin
 from django.conf.urls.static import static
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
+from django.views.static import serve
 
 
 def home(request):
@@ -39,7 +40,7 @@ urlpatterns = [
     path('profiles/', include('profiles_app.urls')),
     path('messages/', include('messages_app.urls')),  # for delete
     path('staff-panel/', include('staff_panel_app.urls')),
-
+    re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
 ]
 
 
@@ -53,5 +54,3 @@ def custom_500(request):
 
 handler404 = custom_404
 handler500 = custom_500
-
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
