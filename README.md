@@ -1,30 +1,65 @@
-# Chat Project
+# NTChat
 
-Chat Project is a community chat platform built with Django and Django REST Framework. Users can register, manage profiles, create topic-based rooms, join conversations, react to messages, receive notifications, and access private dashboards. Staff users also get a separate in-app staff panel for moderation and overview tasks outside the built-in Django admin.
+NTChat is a Django community chat platform built for the Django Advanced course project. It combines public informational pages, profile-driven social features, topic-based rooms, message reactions, in-app notifications, a staff-only management panel, REST API endpoints, and asynchronous background notification processing.
 
-## Features
+## Project Idea
 
-- Public room and profile browsing
-- Custom user model with registration, login, and logout
-- Automatic profile creation for new users
-- Private user dashboard with recent rooms, messages, and notifications
-- Staff-only dashboard with platform statistics and room broadcast notifications
-- Room categories, tags, memberships, and owner-managed room CRUD
-- Message posting, editing, deleting, and reactions
-- In-app notifications with filtering and mark-as-read actions
-- REST API endpoints for rooms, room messages, and authenticated notifications
-- Async notification dispatch using asyncio-based background tasks
+The application is designed as a room-based discussion platform where users can:
 
-## Apps
+- register and log in with a custom user model
+- receive an automatically created profile
+- upload a profile picture
+- browse profiles and public informational pages
+- create and manage discussion rooms
+- join rooms and participate in message threads
+- react to messages
+- receive private notifications when room activity happens
+- access a personal dashboard
+- access a separate staff dashboard for moderation and monitoring
 
-- `accounts_app` - custom user model, signup flow, groups, and authentication helpers
-- `profiles_app` - public profiles and private user dashboard
-- `rooms_app` - rooms, categories, tags, memberships, filters, and room API
-- `messages_app` - room messages, reactions, and owner-only message management
-- `notifications_app` - in-app notifications, filters, API, and async dispatch
-- `staff_panel_app` - staff-only dashboard and broadcast tools
+## Main Features
 
-## Models
+- Custom `ChatUser` model extending Django `AbstractUser`
+- One-to-one user profile with nickname, bio, and avatar
+- Automatic profile creation after signup
+- Public homepage, About, FAQ, and Community Guidelines pages
+- Public profile list and profile details
+- Room categories, tags, and memberships
+- Owner-managed CRUD for profiles, rooms, and messages
+- Message reactions (`Like`, `Love`, `Laugh`)
+- Notification center with filters and mark-as-read actions
+- Private user dashboard
+- Separate in-app staff panel
+- REST API endpoints with serializers and permissions
+- Async notification creation using background threads and `asyncio`
+- Custom template filters for reactions and unread notifications
+- Custom 404 and 500 pages
+
+## Application Structure
+
+The project contains 6 Django apps:
+
+- `accounts_app`  
+  Custom user model, signup flow, group creation, and profile helper logic.
+
+- `profiles_app`  
+  Public profiles, profile editing, profile deletion, avatar support, and private dashboard.
+
+- `rooms_app`  
+  Categories, tags, rooms, memberships, room CRUD, room filtering, and room API endpoints.
+
+- `messages_app`  
+  Room messages, message editing/deletion, and message reactions.
+
+- `notifications_app`  
+  Private notifications, filtering, API endpoint, and async notification dispatch.
+
+- `staff_panel_app`  
+  Staff-only dashboard with statistics and broadcast notifications.
+
+## Database Models
+
+The project currently includes these models:
 
 - `ChatUser`
 - `Profile`
@@ -36,6 +71,136 @@ Chat Project is a community chat platform built with Django and Django REST Fram
 - `Reaction`
 - `Notification`
 
+## Relationships
+
+Examples of many-to-one relationships:
+
+- `Profile -> ChatUser`
+- `Room -> Profile` as creator
+- `Room -> Category`
+- `Message -> Profile`
+- `Message -> Room`
+- `Notification -> Profile`
+- `Notification -> Room`
+
+Examples of many-to-many relationships:
+
+- `Room.members -> Profile`
+- `Room.tags -> Tag`
+
+## Authentication, Roles, and Permissions
+
+- User registration, login, and logout are implemented.
+- The built-in Django user system is extended through `ChatUser`.
+- Each new user automatically gets a `Profile`.
+- Two groups are created automatically after migration:
+  - `Moderators`
+  - `Room Managers`
+- A dedicated in-app `Staff Panel` exists separately from the built-in Django admin.
+
+## Forms and Validation
+
+The project includes these forms:
+
+- `SignUpForm`
+- `ProfileForm`
+- `RoomForm`
+- `RoomFilterForm`
+- `MessageForm`
+- `NotificationFilterForm`
+- `BroadcastNotificationForm`
+
+Validation and UX details include:
+
+- custom validation messages
+- labels, help texts, and placeholders
+- read-only fields in profile and room forms
+- confirmation pages for delete actions
+- avatar upload support through the profile form
+
+## Views and API
+
+The app uses class-based views as the main approach across profiles, rooms, messages, notifications, staff pages, and signup.
+
+REST API functionality includes:
+
+- `GET /rooms/api/`
+- `GET /rooms/api/<id>/`
+- `GET /rooms/api/<id>/messages/`
+- `GET /notifications/api/`
+
+## Asynchronous Processing
+
+The project includes asynchronous notification dispatch in `notifications_app/tasks.py`.
+
+Current async behavior:
+
+- notify room members about new messages
+- notify members about room updates
+- send staff broadcast notifications to room members
+
+## Templates and Pages
+
+The project includes more than 15 templates/pages, including:
+
+- homepage
+- about page
+- FAQ page
+- community guidelines page
+- login page
+- signup page
+- profile list
+- profile details
+- profile form
+- profile delete confirmation
+- user dashboard
+- room list
+- room details
+- room form
+- room delete confirmation
+- message delete confirmation
+- message form
+- notifications page
+- staff dashboard
+- custom 404 page
+- custom 500 page
+
+Reusable layout support includes:
+
+- shared base template
+- shared navbar
+- shared footer
+- custom template tags
+
+## Media Handling
+
+The project supports user profile pictures through `ImageField`.
+
+- uploaded avatars are stored in `profile_pictures/`
+- profile pictures are displayed on profile pages
+- avatars are displayed in room conversations and room header metadata
+- media configuration is included in project settings and URL routing
+
+## Automated Tests
+
+The repository contains 23 automated tests covering:
+
+- signup and automatic profile creation
+- default groups
+- public/private page access
+- owner-only edit restrictions
+- room creation and membership behavior
+- message reactions
+- notifications and filtering
+- API behavior
+- staff access rules
+
+Test command:
+
+```bash
+python manage.py test --settings=chat_project.test_settings
+```
+
 ## Tech Stack
 
 - Python 3.13
@@ -43,26 +208,15 @@ Chat Project is a community chat platform built with Django and Django REST Fram
 - Django REST Framework 3.17.1
 - PostgreSQL
 - Bootstrap 5
+- Pillow
+- WhiteNoise
 
-## Requirements Coverage
-
-- Public and private sections
-- Extended user model
-- 6 Django apps
-- 9 database models
-- Multiple many-to-one and many-to-many relationships
-- Owner-managed CRUD for profiles, rooms, and messages
-- CBV-heavy implementation
-- DRF API endpoints
-- Async notification processing
-- 23 automated tests
-
-## Installation
+## Setup Instructions
 
 ### 1. Clone the repository
 
 ```bash
-git clone <your-repo-url>
+git clone <your-repository-url>
 cd chat_project
 ```
 
@@ -87,32 +241,27 @@ pip install -r requirements.txt
 
 ### 4. Configure environment variables
 
-Copy `.env.example` and set the values for your machine. The project reads its configuration from environment variables and also provides safe local defaults.
+The project uses environment variables for deployment-sensitive configuration.
 
-Example environment values:
+For local development without Azure, the project can still run with SQLite defaults if no Azure PostgreSQL connection string is provided.
+
+Example local `.env` values:
 
 ```env
 DJANGO_SECRET_KEY=change-me
 DJANGO_DEBUG=True
 DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
-DB_NAME=chat_app
-DB_USER=postgres-user
-DB_PASSWORD=password
-DB_HOST=127.0.0.1
-DB_PORT=5432
+DJANGO_CSRF_TRUSTED_ORIGINS=http://127.0.0.1:8000,http://localhost:8000
 ```
 
-You can export them manually before running the server:
+For Azure deployment, configure:
 
-```bash
-export DJANGO_SECRET_KEY="change-me"
-export DJANGO_DEBUG="True"
-export DJANGO_ALLOWED_HOSTS="127.0.0.1,localhost"
-export DB_NAME="chat_app"
-export DB_USER="postgres-user"
-export DB_PASSWORD="password"
-export DB_HOST="127.0.0.1"
-export DB_PORT="5432"
+```env
+DJANGO_SECRET_KEY=your-secret-key
+DJANGO_DEBUG=False
+DJANGO_ALLOWED_HOSTS=your-app.azurewebsites.net
+DJANGO_CSRF_TRUSTED_ORIGINS=https://your-app.azurewebsites.net
+AZURE_POSTGRESQL_CONNECTIONSTRING=your-azure-postgresql-connection-string
 ```
 
 ### 5. Apply migrations
@@ -127,68 +276,53 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-### 7. Run the development server
+### 7. Run the server
 
 ```bash
 python manage.py runserver
 ```
 
-Open the app at [http://127.0.0.1:8000/](http://127.0.0.1:8000/).
-
-## Main URLs
-
-- `/rooms/` - public room list
-- `/profiles/` - public profile list
-- `/accounts/signup/` - registration
-- `/accounts/login/` - login
-- `/profiles/dashboard/` - private user dashboard
-- `/notifications/` - private notifications page
-- `/staff-panel/` - staff-only in-app dashboard
-- `/admin/` - Django admin
-
-## API Endpoints
-
-- `/rooms/api/` - list all rooms
-- `/rooms/api/<id>/` - room details
-- `/rooms/api/<id>/messages/` - messages for a room
-- `/notifications/api/` - authenticated user notifications
-
-## Async Processing
-
-The project includes asyncio-based background notification dispatch:
-
-- new room messages notify other room members
-- room updates notify existing members
-- staff broadcasts notify members of a selected room
-
-The async logic lives in [notifications_app/tasks.py](./notifications_app/tasks.py).
-
-## Testing
-
-The project includes 23 automated tests. They can be run with the dedicated SQLite test settings:
-
-```bash
-python manage.py test --settings=chat_project.test_settings
-```
-
 ## Deployment Notes
 
-- Use PostgreSQL in production
-- Set environment variables through your cloud provider configuration
-- Run `python manage.py collectstatic` before deployment
-- Set `DJANGO_DEBUG=False` in production
-- Add the deployed domain to `DJANGO_ALLOWED_HOSTS`
+- The deployed version is configured for Azure App Service on Linux.
+- PostgreSQL is used in production through Azure environment variables.
+- Static files are served with WhiteNoise.
+- Media files are configured through Django media settings.
+- A separate startup script is included for cloud deployment.
 
-## Default Groups
+## Requirement Coverage Summary
 
-The following groups are created automatically after migrations:
+This project covers the core exam requirements through:
 
-- `Moderators`
-- `Room Managers`
+- 6 Django apps
+- 9 database models
+- extended user model
+- public and private sections
+- authentication system
+- user groups and permissions
+- 7 forms
+- owner-managed CRUD
+- CBV-heavy architecture
+- DRF API endpoints
+- async background processing
+- media upload handling
+- custom error pages
+- reusable templates and navigation
+- 23 automated tests
+
+## Admin and Staff Features
+
+- Built-in Django admin is available at `/admin/`
+- Separate in-app staff dashboard is available at `/staff-panel/`
+- Staff users can review platform statistics and send room broadcasts
 
 ## Custom Template Utilities
 
-The project includes custom template helpers in `rooms_app/templatetags/chat_tags.py`:
+Custom template filters in `rooms_app/templatetags/chat_tags.py`:
 
 - `reaction_count`
 - `unread_notifications_count`
+
+## Author
+
+Project created by Niko for the Django Advanced course project.
