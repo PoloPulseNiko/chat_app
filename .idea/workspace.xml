@@ -4,18 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="66d6aa76-5f06-4096-88ca-281444029760" name="Changes" comment="Made the models and the forms for the page.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chat_project/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/chat_project/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/profiles_app/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/profiles_app/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/profiles_app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/profiles_app/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/profiles_app/profile_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/profiles_app/profile_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/profiles_app/profile_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/profiles_app/profile_form.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/profiles_app/profile_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/profiles_app/profile_list.html" afterDir="false" />
-    </list>
+    <list default="true" id="66d6aa76-5f06-4096-88ca-281444029760" name="Changes" comment="Made the models and the forms for the page." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
