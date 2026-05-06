@@ -15,11 +15,13 @@
     {% endif %}
     <p>{{ profile.bio|default:"No bio provided." }}</p>
 
-    {% if user.is_authenticated and current_profile == profile %}
-        <a href="{% url 'dashboard' %}" class="btn btn-secondary">Dashboard</a>
-        <a href="{% url 'profile_edit' profile.pk %}" class="btn btn-primary">Edit</a>
-        <a href="{% url 'profile_delete' profile.pk %}" class="btn btn-danger">Delete</a>
-    {% endif %}
-    <a href="{% url 'profile_list' %}" class="btn btn-secondary">Back to Profiles</a>
+    <div class="nt-inline-actions">
+        {% if user.is_authenticated and current_profile == profile %}
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">Dashboard</a>
+            <a href="{% url 'profile_edit' profile.pk %}" class="btn btn-primary">Edit</a>
+            <a href="{% url 'profile_delete' profile.pk %}" class="btn btn-danger">Delete</a>
+        {% endif %}
+        <a href="{% url 'profile_list' %}" class="btn btn-secondary">Back to Profiles</a>
+    </div>
 </div>
 {% endblock %}

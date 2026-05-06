@@ -3,62 +3,481 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>{% block title %}NTChat{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --nt-bg: #f5f3ef;
+            --nt-surface: #fffdf9;
+            --nt-ink: #1f1b16;
+            --nt-muted: #74695d;
+            --nt-accent: #8c4f21;
+            --nt-accent-soft: #ead8c7;
+            --nt-border: #d8c7b6;
+            --nt-shadow: 0 10px 30px rgba(49, 32, 18, 0.08);
+            --nt-radius: 16px;
+            --nt-content-max: 1440px;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            min-width: 240px;
+            background:
+                radial-gradient(circle at top right, rgba(140, 79, 33, 0.08), transparent 26rem),
+                linear-gradient(180deg, #f8f4ee 0%, var(--nt-bg) 100%);
+            color: var(--nt-ink);
+            word-wrap: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        a {
+            color: var(--nt-accent);
+        }
+
+        a:hover {
+            color: #6f3d17;
+        }
+
+        .nt-topbar {
+            background: rgba(255, 253, 249, 0.95);
+            border-bottom: 1px solid var(--nt-border);
+            box-shadow: 0 6px 24px rgba(49, 32, 18, 0.05);
+        }
+
+        .nt-topbar-inner {
+            max-width: var(--nt-content-max);
+            margin: 0 auto;
+            padding: 0.9rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .nt-brand {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            text-decoration: none;
+            color: var(--nt-ink);
+            white-space: nowrap;
+        }
+
+        .nt-brand:hover {
+            color: var(--nt-accent);
+        }
+
+        .nt-nav,
+        .nt-nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem 0.5rem;
+            flex-wrap: wrap;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .nt-nav-actions {
+            margin-left: auto;
+        }
+
+        .nt-nav-link,
+        .nt-topbar button.nav-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 2.4rem;
+            padding: 0.45rem 0.8rem;
+            border-radius: 999px;
+            text-decoration: none;
+            color: var(--nt-ink);
+            line-height: 1.2;
+            text-align: center;
+        }
+
+        .nt-nav-link:hover,
+        .nt-topbar button.nav-link:hover {
+            background: var(--nt-accent-soft);
+            color: var(--nt-ink);
+        }
+
+        .nt-topbar button.nav-link {
+            border: 0;
+            background: transparent;
+        }
+
+        .nt-page {
+            max-width: var(--nt-content-max);
+            margin: 0 auto;
+            padding: 1.25rem 1rem 0;
+        }
+
+        .nt-page .container {
+            max-width: 100%;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .card,
+        .list-group-item,
+        .accordion-item {
+            border-color: var(--nt-border);
+            border-radius: var(--nt-radius);
+            box-shadow: var(--nt-shadow);
+        }
+
+        .card-body,
+        .list-group-item,
+        .accordion-body {
+            min-width: 0;
+        }
+
+        label {
+            display: inline-block;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+        }
+
+        form p {
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            white-space: normal;
+        }
+
+        .btn-primary {
+            background: var(--nt-accent);
+            border-color: var(--nt-accent);
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background: #6f3d17;
+            border-color: #6f3d17;
+        }
+
+        .btn-outline-dark:hover,
+        .btn-outline-secondary:hover,
+        .btn-outline-primary:hover {
+            transform: translateY(-1px);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        input[type="file"],
+        select,
+        textarea {
+            width: 100%;
+            max-width: 100%;
+            border: 1px solid var(--nt-border);
+            border-radius: 12px;
+            padding: 0.65rem 0.8rem;
+            background: #fff;
+        }
+
+        input[type="checkbox"],
+        input[type="radio"] {
+            width: auto;
+        }
+
+        textarea {
+            min-height: 5rem;
+            resize: vertical;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .rounded-circle {
+            flex-shrink: 0;
+        }
+
+        .nt-section-header,
+        .nt-inline-actions,
+        .nt-form-actions,
+        .nt-message-row,
+        .nt-profile-row {
+            min-width: 0;
+        }
+
+        .nt-inline-actions,
+        .nt-form-actions {
+            display: flex;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .nt-form-actions {
+            margin-top: 1rem;
+        }
+
+        .nt-inline-actions .btn,
+        .nt-form-actions .btn,
+        .nt-inline-actions form,
+        .nt-form-actions form {
+            min-width: 0;
+        }
+
+        .nt-message-row,
+        .nt-profile-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.9rem;
+        }
+
+        .nt-auth-shell {
+            max-width: 42rem;
+            margin: 0 auto;
+        }
+
+        .nt-auth-card {
+            padding: 1rem;
+        }
+
+        .nt-footer {
+            background: rgba(255, 253, 249, 0.92);
+            border-top: 1px solid var(--nt-border);
+            margin-top: 2rem;
+        }
+
+        .nt-footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem 1rem;
+            flex-wrap: wrap;
+        }
+
+        @media (min-width: 1920px) {
+            html {
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nt-topbar-inner {
+                align-items: stretch;
+            }
+
+            .nt-brand {
+                width: 100%;
+                text-align: center;
+            }
+
+            .nt-nav,
+            .nt-nav-actions {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .nt-nav-actions {
+                margin-left: 0;
+            }
+
+            .nt-page {
+                padding-top: 1rem;
+            }
+        }
+
+        @media (max-width: 480px), (max-height: 480px) {
+            html {
+                font-size: 14px;
+            }
+
+            .nt-topbar-inner {
+                padding: 0.65rem 0.55rem;
+                gap: 0.5rem;
+            }
+
+            .nt-nav-link,
+            .nt-topbar button.nav-link {
+                min-height: 2rem;
+                padding: 0.35rem 0.55rem;
+                font-size: 0.95rem;
+            }
+
+            .nt-page {
+                padding: 0.7rem 0.55rem 0;
+            }
+
+            .card-body,
+            .list-group-item {
+                padding: 0.75rem;
+            }
+
+            .display-4 {
+                font-size: 1.8rem;
+            }
+
+            .lead {
+                font-size: 1rem;
+            }
+
+            .btn-lg {
+                padding: 0.55rem 0.8rem;
+                font-size: 1rem;
+            }
+
+            .nt-auth-card {
+                padding: 0.8rem;
+            }
+
+            .d-flex.gap-2,
+            .d-flex.gap-3 {
+                gap: 0.45rem !important;
+            }
+        }
+
+        @media (max-width: 360px), (max-height: 360px) {
+            html {
+                font-size: 13px;
+            }
+
+            .nt-brand {
+                font-size: 1.1rem;
+            }
+
+            .nt-nav-link,
+            .nt-topbar button.nav-link {
+                width: 100%;
+                border-radius: 12px;
+            }
+
+            .nt-nav,
+            .nt-nav-actions {
+                display: grid;
+                grid-template-columns: 1fr;
+            }
+
+            .btn,
+            .btn-sm,
+            .btn-lg {
+                width: 100%;
+            }
+
+            .nt-inline-actions,
+            .nt-form-actions,
+            .nt-message-row,
+            .nt-profile-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .nt-inline-actions form,
+            .nt-form-actions form {
+                width: 100%;
+            }
+
+            .nt-message-row .rounded-circle,
+            .nt-profile-row .rounded-circle {
+                align-self: flex-start;
+            }
+
+            .list-group-item h5,
+            .card-title,
+            h2,
+            h3,
+            h4,
+            h5 {
+                line-height: 1.2;
+            }
+        }
+
+        @media (max-width: 320px), (max-height: 320px) {
+            html {
+                font-size: 12px;
+            }
+
+            .nt-topbar-inner,
+            .nt-page {
+                padding-left: 0.45rem;
+                padding-right: 0.45rem;
+            }
+
+            .card-body,
+            .list-group-item,
+            .accordion-body {
+                padding: 0.6rem;
+            }
+
+            .badge {
+                white-space: normal;
+            }
+        }
+
+        @media (max-aspect-ratio: 1 / 1) and (max-width: 760px) {
+            .card-body .d-flex.justify-content-between,
+            .d-flex.justify-content-between.align-items-center,
+            .d-flex.justify-content-between.align-items-start {
+                flex-direction: column;
+                align-items: stretch !important;
+            }
+        }
+    </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand"
+<nav class="nt-topbar">
+    <div class="nt-topbar-inner">
+    <a class="nt-brand"
         href="{% if user.is_authenticated %}{% url 'room_list' %}{% else %}{% url 'home' %}{% endif %}">NTChat
     </a>
 
-    <div class="collapse navbar-collapse">
-        <ul class="navbar-nav">
-            <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">About</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'faq' %}">FAQ</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'guidelines' %}">Guidelines</a></li>
+        <ul class="nt-nav">
+            <li><a class="nt-nav-link" href="{% url 'home' %}">Home</a></li>
+            <li><a class="nt-nav-link" href="{% url 'about' %}">About</a></li>
+            <li><a class="nt-nav-link" href="{% url 'faq' %}">FAQ</a></li>
+            <li><a class="nt-nav-link" href="{% url 'guidelines' %}">Guidelines</a></li>
             {% if user.is_authenticated %}
-                <li class="nav-item"><a class="nav-link" href="{% url 'profile_list' %}">Profiles</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'room_list' %}">Rooms</a></li>
+                <li><a class="nt-nav-link" href="{% url 'profile_list' %}">Profiles</a></li>
+                <li><a class="nt-nav-link" href="{% url 'room_list' %}">Rooms</a></li>
             {% endif %}
         </ul>
-        <ul class="navbar-nav ms-auto">
+        <ul class="nt-nav-actions">
             {% if user.is_authenticated %}
-                <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li><a class="nt-nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
                 {% if user.is_authenticated and current_profile %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'notification_list' %}">Notifications ({{ current_profile|unread_notifications_count }})</a>
+                    <li>
+                        <a class="nt-nav-link" href="{% url 'notification_list' %}">Notifications ({{ current_profile|unread_notifications_count }})</a>
                     </li>
                 {% endif %}
 
                 {% if user.is_staff %}
-                    <li class="nav-item"><a class="nav-link" href="{% url 'staff_dashboard' %}">Staff Panel</a></li>
+                    <li><a class="nt-nav-link" href="{% url 'staff_dashboard' %}">Staff Panel</a></li>
                 {% endif %}
                 {% if current_profile %}
-                    <li class="nav-item"><a class="nav-link" href="{% url 'profile_detail' current_profile.pk %}">My Profile</a></li>
+                    <li><a class="nt-nav-link" href="{% url 'profile_detail' current_profile.pk %}">My Profile</a></li>
                 {% endif %}
-                <li class="nav-item">
+                <li>
                     <form method="post" action="{% url 'logout' %}" class="d-inline">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-link nav-link">Logout</button>
                     </form>
                 </li>
             {% else %}
-                <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'signup' %}">Sign Up</a></li>
+                <li><a class="nt-nav-link" href="{% url 'login' %}">Login</a></li>
+                <li><a class="nt-nav-link" href="{% url 'signup' %}">Sign Up</a></li>
             {% endif %}
         </ul>
     </div>
 </nav>
 
-<div class="container mt-4">
+<main class="nt-page">
     {% block content %}{% endblock %}
-</div>
+</main>
 
-<footer class="bg-light text-center p-3 mt-4">
+<footer class="nt-footer text-center p-3 mt-4">
     <div>&copy; 2026 Niko's NTChat</div>
-    <div class="mt-2">
+    <div class="nt-footer-links mt-2">
         <a href="{% url 'about' %}" class="me-3">About</a>
         <a href="{% url 'faq' %}" class="me-3">FAQ</a>
         <a href="{% url 'guidelines' %}">Guidelines</a>

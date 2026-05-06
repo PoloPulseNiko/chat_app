@@ -11,11 +11,11 @@
     data-message-count="{{ messages|length }}"
   ></div>
   <div class="card mb-4">
-    <div class="card-body d-flex justify-content-between align-items-start">
+    <div class="card-body d-flex justify-content-between align-items-start flex-wrap gap-3">
       <div>
         <h2 class="card-title">{{ room.name }}</h2>
         <p class="card-text">{{ room.description }}</p>
-        <div class="d-flex align-items-center gap-2 mb-2">
+        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
           {% if room.creator.avatar %}
             <img
               src="{{ room.creator.avatar.url }}"
@@ -40,7 +40,7 @@
         <p class="text-muted mb-0">Members: {{ room.members.count }}</p>
       </div>
       {% if user.is_authenticated %}
-        <div class="d-flex gap-2">
+        <div class="nt-inline-actions">
           {% if can_manage_room %}
             <a href="{% url 'room_edit' room.pk %}" class="btn btn-warning btn-sm">Edit Room</a>
             <a href="{% url 'room_delete' room.pk %}" class="btn btn-danger btn-sm">Delete Room</a>
@@ -64,7 +64,7 @@
   <div class="list-group mb-4">
     {% for message in messages %}
       <div class="list-group-item">
-        <div class="d-flex align-items-start gap-3">
+        <div class="nt-message-row">
           {% if message.sender.avatar %}
             <img
               src="{{ message.sender.avatar.url }}"
@@ -86,7 +86,7 @@
             {% endif %}
 
             {% if user.is_authenticated and is_member %}
-              <div class="d-flex gap-2 mb-2">
+              <div class="d-flex gap-2 mb-2 flex-wrap">
                 {% for reaction_value, reaction_label in reaction_choices %}
                   <form action="{% url 'message_react' message.pk reaction_value %}" method="post">
                     {% csrf_token %}
@@ -97,8 +97,10 @@
             {% endif %}
 
             {% if user.is_authenticated and current_profile and message.sender == current_profile %}
-              <a href="{% url 'message_edit' message.pk %}" class="btn btn-sm btn-warning">Edit</a>
-              <a href="{% url 'message_delete' message.pk %}" class="btn btn-sm btn-danger">Delete</a>
+              <div class="nt-inline-actions">
+                <a href="{% url 'message_edit' message.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{% url 'message_delete' message.pk %}" class="btn btn-sm btn-danger">Delete</a>
+              </div>
             {% endif %}
           </div>
         </div>
@@ -130,7 +132,7 @@
     </div>
   </div>
 
-  <div class="mt-4">
+  <div class="mt-4 nt-inline-actions">
     <a href="{% url 'room_list' %}" class="btn btn-secondary">Back to Rooms</a>
   </div>
 

@@ -6,7 +6,18 @@
   <component name="ChangeListManager">
     <list default="true" id="66d6aa76-5f06-4096-88ca-281444029760" name="Changes" comment="Made the models and the forms for the page.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/notifications_app/notification_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/notifications_app/notification_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/profiles_app/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/profiles_app/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/profiles_app/profile_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/profiles_app/profile_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/profiles_app/profile_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/profiles_app/profile_form.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/profiles_app/profile_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/profiles_app/profile_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/registration/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/registration/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/registration/signup.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/registration/signup.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/rooms_app/room_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/rooms_app/room_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/rooms_app/room_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/rooms_app/room_form.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/staff_panel_app/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/staff_panel_app/dashboard.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -148,7 +159,8 @@
       <workItem from="1774353026839" duration="15364000" />
       <workItem from="1775658909079" duration="56351000" />
       <workItem from="1776691877578" duration="437000" />
-      <workItem from="1776692713435" duration="1764000" />
+      <workItem from="1776692713435" duration="4424000" />
+      <workItem from="1778065331381" duration="1096000" />
     </task>
     <task id="LOCAL-00001" summary="Made the models and the forms for the page.">
       <option name="closed" value="true" />
