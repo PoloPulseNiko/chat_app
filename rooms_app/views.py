@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
@@ -12,8 +13,11 @@ from .api_views import RoomDetailAPIView, RoomListAPIView, RoomMessagesAPIView
 from .forms import RoomFilterForm, RoomForm
 from .models import Membership, Room
 
+
 class RoomOwnerRequiredMixin(UserPassesTestMixin):
     def test_func(self):
+        if self.request.user.is_staff:
+            return True
         room = self.get_object()
         profile = ensure_user_profile(self.request.user)
         return bool(profile and room.creator == profile)
@@ -29,6 +33,16 @@ class RoomListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         queryset = Room.objects.select_related("creator", "category").prefetch_related("members", "tags")
+        profile = ensure_user_profile(self.request.user)
+        if self.request.user.is_staff:
+            visible_rooms = queryset
+        elif profile:
+            visible_rooms = queryset.filter(
+                Q(visibility=Room.VISIBILITY_PUBLIC) | Q(members=profile)
+            )
+        else:
+            visible_rooms = queryset.filter(visibility=Room.VISIBILITY_PUBLIC)
+
         self.filter_form = RoomFilterForm(self.request.GET or None)
 
         if self.filter_form.is_valid():
@@ -38,15 +52,15 @@ class RoomListView(LoginRequiredMixin, ListView):
             sort = self.filter_form.cleaned_data.get("sort") or "name"
 
             if search:
-                queryset = queryset.filter(name__icontains=search)
+                visible_rooms = visible_rooms.filter(name__icontains=search)
             if category:
-                queryset = queryset.filter(category=category)
+                visible_rooms = visible_rooms.filter(category=category)
             if tag:
-                queryset = queryset.filter(tags=tag)
+                visible_rooms = visible_rooms.filter(tags=tag)
 
-            queryset = queryset.order_by(sort).distinct()
+            visible_rooms = visible_rooms.order_by(sort).distinct()
 
-        return queryset
+        return visible_rooms
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -70,13 +84,17 @@ class RoomDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         room = self.object
         user_profile = ensure_user_profile(self.request.user)
-        is_member = bool(user_profile and room.members.filter(pk=user_profile.pk).exists())
+        is_member = room.is_member(user_profile)
 
         context["messages"] = room.messages.select_related("sender").prefetch_related("reactions__profile")
         context["form"] = kwargs.get("form", MessageForm())
         context["is_member"] = is_member
-        context["can_manage_room"] = bool(user_profile and room.creator_id == user_profile.pk)
-        context["can_post_message"] = is_member
+        context["can_manage_room"] = bool(
+            self.request.user.is_staff or (user_profile and room.creator_id == user_profile.pk)
+        )
+        context["can_post_message"] = room.can_post(user=self.request.user, profile=user_profile)
+        context["can_view_room"] = room.can_view(user=self.request.user, profile=user_profile)
+        context["can_join_room"] = room.can_join(user=self.request.user, profile=user_profile)
         context["reaction_choices"] = [
             ("like", "Like"),
             ("love", "Love"),
@@ -84,12 +102,19 @@ class RoomDetailView(DetailView):
         ]
         return context
 
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        user_profile = ensure_user_profile(request.user)
+        if not self.object.can_view(user=request.user, profile=user_profile):
+            return redirect("room_list")
+        return super().dispatch(request, *args, **kwargs)
+
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         if not request.user.is_authenticated:
             return redirect("login")
         profile = ensure_user_profile(request.user)
-        if not profile or not self.object.members.filter(pk=profile.pk).exists():
+        if not self.object.can_post(user=request.user, profile=profile):
             return redirect("room_detail", pk=self.object.pk)
 
         form = MessageForm(request.POST)
@@ -111,13 +136,22 @@ class RoomCreateView(LoginRequiredMixin, CreateView):
     template_name = "rooms_app/room_form.html"
     success_url = reverse_lazy("room_list")
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
     def form_valid(self, form):
         room = form.save(commit=False)
         room.creator = ensure_user_profile(self.request.user)
         room.save()
         form.save_m2m()
         room.members.add(room.creator)
-        Membership.objects.get_or_create(profile=room.creator, room=room)
+        Membership.objects.get_or_create(
+            profile=room.creator,
+            room=room,
+            defaults={"role": Membership.MODERATOR},
+        )
         return redirect("room_list")
 
 
@@ -125,6 +159,11 @@ class RoomUpdateView(LoginRequiredMixin, RoomOwnerRequiredMixin, UpdateView):
     model = Room
     form_class = RoomForm
     template_name = "rooms_app/room_form.html"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -145,6 +184,9 @@ class RoomJoinView(LoginRequiredMixin, View):
     def post(self, request, pk):
         room = get_object_or_404(Room, pk=pk)
         profile = ensure_user_profile(request.user)
+
+        if not room.can_join(user=request.user, profile=profile):
+            return redirect("room_detail", pk=room.pk)
 
         room.members.add(profile)
         Membership.objects.get_or_create(profile=profile, room=room)

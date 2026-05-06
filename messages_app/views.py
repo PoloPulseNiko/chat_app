@@ -42,6 +42,8 @@ class MessageReactionToggleView(LoginRequiredMixin, View):
 
         if reaction_type not in valid_reactions:
             return redirect("room_detail", pk=message.room.pk)
+        if not message.room.can_view(user=request.user, profile=profile):
+            return redirect("room_list")
 
         reaction, created = Reaction.objects.get_or_create(
             message=message,

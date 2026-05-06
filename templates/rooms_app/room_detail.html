@@ -29,6 +29,23 @@
         {% if room.category %}
           <p class="text-muted mb-1">Category: {{ room.category.name }}</p>
         {% endif %}
+        <div class="d-flex flex-wrap gap-2 mb-2">
+          {% if room.visibility == "public" %}
+            <span class="badge text-bg-success">Public Room</span>
+          {% elif room.visibility == "private" %}
+            <span class="badge text-bg-warning">Private Room</span>
+          {% else %}
+            <span class="badge text-bg-dark">Staff Only Room</span>
+          {% endif %}
+
+          {% if room.posting_policy == "members" %}
+            <span class="badge text-bg-primary">Members Can Post</span>
+          {% elif room.posting_policy == "moderators" %}
+            <span class="badge text-bg-secondary">Moderators Can Post</span>
+          {% else %}
+            <span class="badge text-bg-danger">Staff Can Post</span>
+          {% endif %}
+        </div>
         {% if room.tags.exists %}
           <p class="text-muted mb-1">
             Tags:
@@ -49,7 +66,7 @@
               {% csrf_token %}
               <button type="submit" class="btn btn-outline-secondary btn-sm">Leave Room</button>
             </form>
-          {% else %}
+          {% elif can_join_room %}
             <form action="{% url 'room_join' room.pk %}" method="post">
               {% csrf_token %}
               <button type="submit" class="btn btn-success btn-sm">Join Room</button>
@@ -128,6 +145,8 @@
           </div>
           <button type="submit" class="btn btn-primary">Send</button>
         </form>
+      {% elif user.is_authenticated and is_member %}
+        <p class="mb-0">This room is visible to you, but only moderators or staff can send messages here.</p>
       {% elif user.is_authenticated %}
         <p class="mb-0">Join this room first if you want to participate in the conversation.</p>
       {% else %}

@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="66d6aa76-5f06-4096-88ca-281444029760" name="Changes" comment="Made the models and the forms for the page." />
+    <list default="true" id="66d6aa76-5f06-4096-88ca-281444029760" name="Changes" comment="Made the models and the forms for the page.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/rooms_app/room_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/rooms_app/room_form.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -146,7 +150,7 @@
       <workItem from="1775658909079" duration="56351000" />
       <workItem from="1776691877578" duration="437000" />
       <workItem from="1776692713435" duration="4424000" />
-      <workItem from="1778065331381" duration="1432000" />
+      <workItem from="1778065331381" duration="2471000" />
     </task>
     <task id="LOCAL-00001" summary="Made the models and the forms for the page.">
       <option name="closed" value="true" />

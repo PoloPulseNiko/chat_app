@@ -16,8 +16,8 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Room)
 class RoomAdmin(admin.ModelAdmin):
-    list_display = ("name", "category", "creator")
-    list_filter = ("category",)
+    list_display = ("name", "category", "creator", "visibility", "posting_policy")
+    list_filter = ("category", "visibility", "posting_policy")
     search_fields = ("name",)
 
 

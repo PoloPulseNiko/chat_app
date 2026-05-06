@@ -4,34 +4,164 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2>{% if form.instance.pk %}Edit{% else %}Create{% endif %} a Chat Room</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.non_field_errors }}
-        <div class="mb-3">
-            {{ form.name.label_tag }}
-            {{ form.name }}
-            {{ form.name.errors }}
+    <style>
+        .nt-room-form-shell {
+            max-width: 56rem;
+            margin: 0 auto;
+        }
+
+        .nt-room-form-card {
+            overflow: hidden;
+        }
+
+        .nt-room-form-intro {
+            max-width: 42rem;
+        }
+
+        .nt-room-advanced {
+            margin-top: 1rem;
+            border: 1px solid var(--nt-border);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 0.9rem;
+        }
+
+        .nt-room-advanced summary {
+            margin: -0.1rem 0 0.75rem;
+        }
+
+        .nt-room-advanced[open] summary {
+            margin-bottom: 0.9rem;
+        }
+
+        .nt-room-advanced-fields {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .nt-room-tag-list ul,
+        .nt-room-tag-list > div {
+            display: grid;
+            gap: 0.65rem;
+            padding-left: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .nt-room-tag-list label {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.55rem;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .nt-room-tag-list input[type="checkbox"] {
+            margin-top: 0.2rem;
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 641px) and (min-height: 521px) {
+            .nt-room-advanced {
+                padding: 0;
+                border: 0;
+                background: transparent;
+            }
+
+            .nt-room-advanced summary {
+                display: none;
+            }
+
+            .nt-room-advanced > *:not(summary) {
+                display: block;
+            }
+
+            .nt-room-advanced-fields {
+                grid-template-columns: 1fr 1fr;
+                align-items: start;
+            }
+        }
+
+        @media (max-width: 400px), (max-height: 400px) {
+            .nt-room-form-card .card-body {
+                padding: 0.8rem;
+            }
+
+            .nt-room-advanced {
+                padding: 0.75rem;
+            }
+        }
+    </style>
+
+    <div class="nt-room-form-shell">
+        <div class="mb-4 nt-room-form-intro">
+            <h2 class="mb-2">{% if form.instance.pk %}Edit{% else %}Create{% endif %} a Chat Room</h2>
+            <p class="text-muted mb-0">
+                Set the core vibe first, then open the extra room options when you want to organize it properly.
+            </p>
         </div>
-        <div class="mb-3">
-            {{ form.description.label_tag }}
-            {{ form.description }}
-            {{ form.description.errors }}
+
+        <div class="card nt-room-form-card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.non_field_errors }}
+                    <div class="mb-3">
+                        {{ form.name.label_tag }}
+                        {{ form.name }}
+                        {% if form.name.help_text %}<div class="form-text">{{ form.name.help_text }}</div>{% endif %}
+                        {{ form.name.errors }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.description.label_tag }}
+                        {{ form.description }}
+                        {% if form.description.help_text %}<div class="form-text">{{ form.description.help_text }}</div>{% endif %}
+                        {{ form.description.errors }}
+                    </div>
+
+                    <details class="nt-room-advanced">
+                        <summary class="nt-compact-toggle">Room Options</summary>
+                        <div class="nt-room-advanced-fields">
+                            <div class="mb-3 mb-md-0">
+                                {{ form.category.label_tag }}
+                                {{ form.category }}
+                                {% if form.category.help_text %}<div class="form-text">{{ form.category.help_text }}</div>{% endif %}
+                                {{ form.category.errors }}
+                            </div>
+                            <div class="mb-3 mb-md-0">
+                                {% if form.visibility %}
+                                    <div class="mb-3">
+                                        {{ form.visibility.label_tag }}
+                                        {{ form.visibility }}
+                                        {% if form.visibility.help_text %}<div class="form-text">{{ form.visibility.help_text }}</div>{% endif %}
+                                        {{ form.visibility.errors }}
+                                    </div>
+                                {% endif %}
+                                {% if form.posting_policy %}
+                                    <div class="mb-3 mb-0">
+                                        {{ form.posting_policy.label_tag }}
+                                        {{ form.posting_policy }}
+                                        {% if form.posting_policy.help_text %}<div class="form-text">{{ form.posting_policy.help_text }}</div>{% endif %}
+                                        {{ form.posting_policy.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3 mb-md-0 nt-room-tag-list">
+                                {{ form.tags.label_tag }}
+                                {{ form.tags }}
+                                {% if form.tags.help_text %}<div class="form-text">{{ form.tags.help_text }}</div>{% endif %}
+                                {{ form.tags.errors }}
+                            </div>
+                        </div>
+                    </details>
+
+                    <div class="nt-form-actions">
+                        <button type="submit" class="btn btn-primary">{% if form.instance.pk %}Update Room{% else %}Create Room{% endif %}</button>
+                        <a href="{% if form.instance.pk %}{% url 'room_detail' form.instance.pk %}{% else %}{% url 'room_list' %}{% endif %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="mb-3">
-            {{ form.category.label_tag }}
-            {{ form.category }}
-            {{ form.category.errors }}
-        </div>
-        <div class="mb-3">
-            {{ form.tags.label_tag }}
-            {{ form.tags }}
-            {{ form.tags.errors }}
-        </div>
-        <div class="nt-form-actions">
-            <button type="submit" class="btn btn-primary">{% if form.instance.pk %}Update Room{% else %}Create Room{% endif %}</button>
-            <a href="{% if form.instance.pk %}{% url 'room_detail' form.instance.pk %}{% else %}{% url 'room_list' %}{% endif %}" class="btn btn-secondary">Cancel</a>
-        </div>
-    </form>
+    </div>
 </div>
 {% endblock %}

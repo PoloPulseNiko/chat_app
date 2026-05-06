@@ -24,6 +24,26 @@ class Tag(models.Model):
 
 
 class Room(models.Model):
+    VISIBILITY_PUBLIC = "public"
+    VISIBILITY_PRIVATE = "private"
+    VISIBILITY_STAFF = "staff"
+
+    VISIBILITY_CHOICES = [
+        (VISIBILITY_PUBLIC, "Public"),
+        (VISIBILITY_PRIVATE, "Private (members only)"),
+        (VISIBILITY_STAFF, "Staff Only"),
+    ]
+
+    POSTING_MEMBERS = "members"
+    POSTING_MODERATORS = "moderators"
+    POSTING_STAFF = "staff"
+
+    POSTING_CHOICES = [
+        (POSTING_MEMBERS, "Any room member"),
+        (POSTING_MODERATORS, "Room moderators only"),
+        (POSTING_STAFF, "Staff only"),
+    ]
+
     name = models.CharField(max_length=100)
     description = models.TextField()
     creator = models.ForeignKey("profiles_app.Profile", on_delete=models.CASCADE)
@@ -36,9 +56,58 @@ class Room(models.Model):
     )
     members = models.ManyToManyField("profiles_app.Profile", related_name="rooms")
     tags = models.ManyToManyField(Tag, related_name="rooms", blank=True)
+    visibility = models.CharField(
+        max_length=20,
+        choices=VISIBILITY_CHOICES,
+        default=VISIBILITY_PUBLIC,
+    )
+    posting_policy = models.CharField(
+        max_length=20,
+        choices=POSTING_CHOICES,
+        default=POSTING_MEMBERS,
+    )
 
     def __str__(self):
         return self.name
+
+    def is_member(self, profile):
+        if not profile:
+            return False
+        return self.members.filter(pk=profile.pk).exists()
+
+    def is_moderator(self, profile):
+        if not profile:
+            return False
+        if self.creator_id == profile.pk:
+            return True
+        return self.memberships.filter(profile=profile, role=Membership.MODERATOR).exists()
+
+    def can_view(self, user=None, profile=None):
+        if user and user.is_staff:
+            return True
+        if self.visibility == self.VISIBILITY_PUBLIC:
+            return True
+        if self.visibility == self.VISIBILITY_PRIVATE:
+            return self.is_member(profile)
+        return False
+
+    def can_join(self, user=None, profile=None):
+        if not profile or (user and user.is_staff):
+            return False
+        if self.visibility != self.VISIBILITY_PUBLIC:
+            return False
+        return not self.is_member(profile)
+
+    def can_post(self, user=None, profile=None):
+        if not self.can_view(user=user, profile=profile):
+            return False
+        if user and user.is_staff:
+            return True
+        if self.posting_policy == self.POSTING_MEMBERS:
+            return self.is_member(profile)
+        if self.posting_policy == self.POSTING_MODERATORS:
+            return self.is_moderator(profile)
+        return False
 
 
 class Membership(models.Model):
