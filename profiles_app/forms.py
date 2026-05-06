@@ -22,8 +22,9 @@ class ProfileForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
-        if self.instance and self.instance.pk:
+        if self.instance and self.instance.pk and not (user and user.is_staff):
             self.fields["nickname"].widget.attrs["readonly"] = True
 
     def clean_nickname(self):

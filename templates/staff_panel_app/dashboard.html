@@ -73,22 +73,67 @@
         </div>
     </div>
 
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4 class="card-title">Room Access Control</h4>
+            <p class="text-muted">Update a room's visibility and decide who is allowed to post without leaving the staff panel.</p>
+            <form method="post" action="{% url 'staff_room_access' %}">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-lg-4">
+                        {{ room_access_form.room.label_tag }}
+                        {{ room_access_form.room }}
+                        {{ room_access_form.room.errors }}
+                    </div>
+                    <div class="col-lg-4">
+                        {{ room_access_form.visibility.label_tag }}
+                        {{ room_access_form.visibility }}
+                        {% if room_access_form.visibility.help_text %}
+                            <div class="form-text">{{ room_access_form.visibility.help_text }}</div>
+                        {% endif %}
+                        {{ room_access_form.visibility.errors }}
+                    </div>
+                    <div class="col-lg-4">
+                        {{ room_access_form.posting_policy.label_tag }}
+                        {{ room_access_form.posting_policy }}
+                        {% if room_access_form.posting_policy.help_text %}
+                            <div class="form-text">{{ room_access_form.posting_policy.help_text }}</div>
+                        {% endif %}
+                        {{ room_access_form.posting_policy.errors }}
+                    </div>
+                </div>
+                <div class="nt-form-actions">
+                    <button type="submit" class="btn btn-warning">Update Room Access</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="row g-4">
         <div class="col-lg-6">
             <div class="card h-100">
                 <div class="card-body">
                     <h4 class="card-title">Recent Users</h4>
-                    {% if recent_users %}
+                    {% if recent_profiles %}
                         <div class="list-group list-group-flush">
-                            {% for recent_user in recent_users %}
+                            {% for recent_profile in recent_profiles %}
                                 <div class="list-group-item px-0">
-                                    <strong>{{ recent_user.username }}</strong>
-                                    <div class="text-muted small">{{ recent_user.email }}</div>
+                                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                                        <div>
+                                            <strong>{{ recent_profile.nickname }}</strong>
+                                            <div class="text-muted small">{{ recent_profile.user.email }}</div>
+                                        </div>
+                                        <div class="nt-inline-actions">
+                                            <a href="{% url 'profile_detail' recent_profile.pk %}" class="btn btn-sm btn-outline-secondary">View</a>
+                                            <a href="{% url 'profile_edit' recent_profile.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                            <a href="{% url 'profile_delete' recent_profile.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                                        </div>
+                                    </div>
                                 </div>
                             {% endfor %}
                         </div>
                     {% else %}
-                        <p class="text-muted mb-0">No users available.</p>
+                        <p class="text-muted mb-0">No profiles available.</p>
                     {% endif %}
                 </div>
             </div>
@@ -102,10 +147,22 @@
                         <div class="list-group list-group-flush">
                             {% for room in recent_rooms %}
                                 <div class="list-group-item px-0">
-                                    <strong>{{ room.name }}</strong>
-                                    <div class="text-muted small">
-                                        {{ room.creator.nickname }}
-                                        {% if room.category %} | {{ room.category.name }}{% endif %}
+                                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                                        <div>
+                                            <strong>{{ room.name }}</strong>
+                                            <div class="text-muted small">
+                                                {{ room.creator.nickname }}
+                                                {% if room.category %} | {{ room.category.name }}{% endif %}
+                                            </div>
+                                            <div class="small mt-1">
+                                                <span class="badge text-bg-light border">{{ room.get_visibility_display }}</span>
+                                                <span class="badge text-bg-light border">{{ room.get_posting_policy_display }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="nt-inline-actions">
+                                            <a href="{% url 'room_detail' room.pk %}" class="btn btn-sm btn-outline-secondary">Open</a>
+                                            <a href="{% url 'room_edit' room.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                        </div>
                                     </div>
                                 </div>
                             {% endfor %}

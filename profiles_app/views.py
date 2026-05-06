@@ -15,7 +15,9 @@ from .models import Profile
 class ProfileOwnerRequiredMixin(UserPassesTestMixin):
     def test_func(self):
         profile = self.get_object()
-        return self.request.user.is_authenticated and profile.user == self.request.user
+        return self.request.user.is_authenticated and (
+            self.request.user.is_staff or profile.user == self.request.user
+        )
 
 
 class ProfileListView(ListView):
@@ -52,6 +54,11 @@ class ProfileUpdateView(LoginRequiredMixin, ProfileOwnerRequiredMixin, UpdateVie
     model = Profile
     form_class = ProfileForm
     template_name = "profiles_app/profile_form.html"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
 
     def get_success_url(self):
         return reverse_lazy("profile_detail", kwargs={"pk": self.object.pk})

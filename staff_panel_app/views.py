@@ -11,7 +11,7 @@ from notifications_app.services import create_broadcast_notifications
 from profiles_app.models import Profile
 from rooms_app.models import Category, Membership, Room
 
-from .forms import BroadcastNotificationForm
+from .forms import BroadcastNotificationForm, RoomAccessControlForm
 
 
 class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
@@ -36,10 +36,12 @@ class StaffDashboardView(StaffRequiredMixin, TemplateView):
                 "notification_count": Notification.objects.count(),
                 "unread_notification_count": Notification.objects.filter(is_read=False).count(),
                 "recent_users": ChatUser.objects.order_by("-date_joined")[:5],
+                "recent_profiles": Profile.objects.select_related("user").order_by("-id")[:6],
                 "recent_rooms": Room.objects.select_related("creator", "category").order_by("-id")[:5],
                 "recent_messages": Message.objects.select_related("sender", "room").order_by("-created_at")[:5],
                 "recent_notifications": Notification.objects.select_related("recipient", "actor", "room").order_by("-created_at")[:5],
                 "broadcast_form": kwargs.get("broadcast_form", BroadcastNotificationForm()),
+                "room_access_form": kwargs.get("room_access_form", RoomAccessControlForm()),
             }
         )
         return context
@@ -56,3 +58,15 @@ class StaffBroadcastView(StaffRequiredMixin, View):
             )
             return redirect("staff_dashboard")
         return StaffDashboardView.as_view()(request, broadcast_form=form)
+
+
+class StaffRoomAccessUpdateView(StaffRequiredMixin, View):
+    def post(self, request):
+        form = RoomAccessControlForm(request.POST)
+        if form.is_valid():
+            room = form.cleaned_data["room"]
+            room.visibility = form.cleaned_data["visibility"]
+            room.posting_policy = form.cleaned_data["posting_policy"]
+            room.save(update_fields=["visibility", "posting_policy"])
+            return redirect("staff_dashboard")
+        return StaffDashboardView.as_view()(request, room_access_form=form)
