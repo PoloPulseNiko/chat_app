@@ -61,7 +61,11 @@
   </div>
 
   <h4>Messages</h4>
-  <div class="list-group mb-4">
+  <div
+    class="list-group mb-4 overflow-auto"
+    id="room-message-list"
+    style="max-height: min(62vh, 38rem); scroll-behavior: smooth;"
+  >
     {% for message in messages %}
       <div class="list-group-item">
         <div class="nt-message-row">
@@ -110,7 +114,7 @@
     {% endfor %}
   </div>
 
-  <div class="card">
+  <div class="card" id="room-message-composer">
     <div class="card-body">
       <h5 class="card-title">Send a message</h5>
       {% if user.is_authenticated and can_post_message %}
@@ -141,12 +145,23 @@
 <script>
   (function () {
     const refreshConfig = document.getElementById("room-refresh-config");
+    const messageList = document.getElementById("room-message-list");
     if (!refreshConfig) {
       return;
     }
 
     const apiUrl = refreshConfig.dataset.apiUrl;
     let knownMessageCount = Number(refreshConfig.dataset.messageCount || 0);
+
+    function scrollMessagesToBottom() {
+      if (!messageList) {
+        return;
+      }
+
+      messageList.scrollTop = messageList.scrollHeight;
+    }
+
+    window.requestAnimationFrame(scrollMessagesToBottom);
 
     async function checkForNewMessages() {
       try {
@@ -171,6 +186,7 @@
         );
 
         if (latestCount !== knownMessageCount && !isTypingMessage) {
+          sessionStorage.setItem("ntchat:returnToRoomMessages", "1");
           window.location.reload();
           return;
         }
@@ -179,6 +195,11 @@
       } catch (error) {
         console.debug("Room auto-refresh check failed.", error);
       }
+    }
+
+    if (sessionStorage.getItem("ntchat:returnToRoomMessages") === "1") {
+      sessionStorage.removeItem("ntchat:returnToRoomMessages");
+      window.requestAnimationFrame(scrollMessagesToBottom);
     }
 
     window.setInterval(checkForNewMessages, 5000);

@@ -71,6 +71,18 @@
             color: var(--nt-accent);
         }
 
+        .nt-nav-toggle {
+            display: none;
+            margin-left: auto;
+            border: 1px solid var(--nt-border);
+            border-radius: 12px;
+            background: var(--nt-surface);
+            color: var(--nt-ink);
+            padding: 0.45rem 0.7rem;
+            line-height: 1;
+            font-size: 1.15rem;
+        }
+
         .nt-nav,
         .nt-nav-actions {
             display: flex;
@@ -84,6 +96,10 @@
 
         .nt-nav-actions {
             margin-left: auto;
+        }
+
+        .nt-nav-cluster {
+            display: contents;
         }
 
         .nt-nav-link,
@@ -289,6 +305,61 @@
             }
         }
 
+        @media (max-width: 640px), (max-height: 520px) {
+            .nt-topbar-inner {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) auto;
+                align-items: center;
+            }
+
+            .nt-brand {
+                width: auto;
+                text-align: left;
+                min-width: 0;
+            }
+
+            .nt-nav-toggle {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .nt-nav-cluster {
+                display: none;
+                grid-column: 1 / -1;
+                width: 100%;
+                padding-top: 0.5rem;
+            }
+
+            .nt-topbar-inner.nt-nav-open .nt-nav-cluster {
+                display: block;
+            }
+
+            .nt-nav,
+            .nt-nav-actions {
+                width: 100%;
+                justify-content: stretch;
+                margin-left: 0;
+            }
+
+            .nt-nav-actions {
+                margin-top: 0.35rem;
+            }
+
+            .nt-nav li,
+            .nt-nav-actions li {
+                width: 100%;
+            }
+
+            .nt-nav-link,
+            .nt-topbar button.nav-link {
+                width: 100%;
+                justify-content: flex-start;
+                border-radius: 12px;
+                padding: 0.55rem 0.75rem;
+            }
+        }
+
         @media (max-width: 480px), (max-height: 480px) {
             html {
                 font-size: 14px;
@@ -345,18 +416,6 @@
 
             .nt-brand {
                 font-size: 1.1rem;
-            }
-
-            .nt-nav-link,
-            .nt-topbar button.nav-link {
-                width: 100%;
-                border-radius: 12px;
-            }
-
-            .nt-nav,
-            .nt-nav-actions {
-                display: grid;
-                grid-template-columns: 1fr;
             }
 
             .btn,
@@ -427,47 +486,59 @@
 </head>
 <body>
 <nav class="nt-topbar">
-    <div class="nt-topbar-inner">
+    <div class="nt-topbar-inner" id="nt-topbar-inner">
     <a class="nt-brand"
         href="{% if user.is_authenticated %}{% url 'room_list' %}{% else %}{% url 'home' %}{% endif %}">NTChat
     </a>
+        <button
+            type="button"
+            class="nt-nav-toggle"
+            id="nt-nav-toggle"
+            aria-expanded="false"
+            aria-controls="nt-nav-cluster"
+            aria-label="Toggle navigation"
+        >
+            Menu
+        </button>
 
-        <ul class="nt-nav">
-            <li><a class="nt-nav-link" href="{% url 'home' %}">Home</a></li>
-            <li><a class="nt-nav-link" href="{% url 'about' %}">About</a></li>
-            <li><a class="nt-nav-link" href="{% url 'faq' %}">FAQ</a></li>
-            <li><a class="nt-nav-link" href="{% url 'guidelines' %}">Guidelines</a></li>
-            {% if user.is_authenticated %}
-                <li><a class="nt-nav-link" href="{% url 'profile_list' %}">Profiles</a></li>
-                <li><a class="nt-nav-link" href="{% url 'room_list' %}">Rooms</a></li>
-            {% endif %}
-        </ul>
-        <ul class="nt-nav-actions">
-            {% if user.is_authenticated %}
-                <li><a class="nt-nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
-                {% if user.is_authenticated and current_profile %}
+        <div class="nt-nav-cluster" id="nt-nav-cluster">
+            <ul class="nt-nav">
+                <li><a class="nt-nav-link" href="{% url 'home' %}">Home</a></li>
+                <li><a class="nt-nav-link" href="{% url 'about' %}">About</a></li>
+                <li><a class="nt-nav-link" href="{% url 'faq' %}">FAQ</a></li>
+                <li><a class="nt-nav-link" href="{% url 'guidelines' %}">Guidelines</a></li>
+                {% if user.is_authenticated %}
+                    <li><a class="nt-nav-link" href="{% url 'profile_list' %}">Profiles</a></li>
+                    <li><a class="nt-nav-link" href="{% url 'room_list' %}">Rooms</a></li>
+                {% endif %}
+            </ul>
+            <ul class="nt-nav-actions">
+                {% if user.is_authenticated %}
+                    <li><a class="nt-nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
+                    {% if user.is_authenticated and current_profile %}
+                        <li>
+                            <a class="nt-nav-link" href="{% url 'notification_list' %}">Notifications ({{ current_profile|unread_notifications_count }})</a>
+                        </li>
+                    {% endif %}
+
+                    {% if user.is_staff %}
+                        <li><a class="nt-nav-link" href="{% url 'staff_dashboard' %}">Staff Panel</a></li>
+                    {% endif %}
+                    {% if current_profile %}
+                        <li><a class="nt-nav-link" href="{% url 'profile_detail' current_profile.pk %}">My Profile</a></li>
+                    {% endif %}
                     <li>
-                        <a class="nt-nav-link" href="{% url 'notification_list' %}">Notifications ({{ current_profile|unread_notifications_count }})</a>
+                        <form method="post" action="{% url 'logout' %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-link nav-link">Logout</button>
+                        </form>
                     </li>
+                {% else %}
+                    <li><a class="nt-nav-link" href="{% url 'login' %}">Login</a></li>
+                    <li><a class="nt-nav-link" href="{% url 'signup' %}">Sign Up</a></li>
                 {% endif %}
-
-                {% if user.is_staff %}
-                    <li><a class="nt-nav-link" href="{% url 'staff_dashboard' %}">Staff Panel</a></li>
-                {% endif %}
-                {% if current_profile %}
-                    <li><a class="nt-nav-link" href="{% url 'profile_detail' current_profile.pk %}">My Profile</a></li>
-                {% endif %}
-                <li>
-                    <form method="post" action="{% url 'logout' %}" class="d-inline">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-link nav-link">Logout</button>
-                    </form>
-                </li>
-            {% else %}
-                <li><a class="nt-nav-link" href="{% url 'login' %}">Login</a></li>
-                <li><a class="nt-nav-link" href="{% url 'signup' %}">Sign Up</a></li>
-            {% endif %}
-        </ul>
+            </ul>
+        </div>
     </div>
 </nav>
 
@@ -483,5 +554,31 @@
         <a href="{% url 'guidelines' %}">Guidelines</a>
     </div>
 </footer>
+<script>
+    (function () {
+        const topbar = document.getElementById("nt-topbar-inner");
+        const toggle = document.getElementById("nt-nav-toggle");
+        const mobileMediaQuery = window.matchMedia("(max-width: 640px), (max-height: 520px)");
+
+        if (!topbar || !toggle) {
+            return;
+        }
+
+        function syncNavState() {
+            if (!mobileMediaQuery.matches) {
+                topbar.classList.remove("nt-nav-open");
+                toggle.setAttribute("aria-expanded", "false");
+            }
+        }
+
+        toggle.addEventListener("click", function () {
+            const isOpen = topbar.classList.toggle("nt-nav-open");
+            toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        });
+
+        syncNavState();
+        mobileMediaQuery.addEventListener("change", syncNavState);
+    })();
+</script>
 </body>
 </html>
