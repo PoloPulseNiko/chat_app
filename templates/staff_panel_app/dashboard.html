@@ -80,12 +80,12 @@
             <form method="post" action="{% url 'staff_room_access' %}">
                 {% csrf_token %}
                 <div class="row g-3">
-                    <div class="col-lg-4">
+                    <div class="col-lg-3">
                         {{ room_access_form.room.label_tag }}
                         {{ room_access_form.room }}
                         {{ room_access_form.room.errors }}
                     </div>
-                    <div class="col-lg-4">
+                    <div class="col-lg-3">
                         {{ room_access_form.visibility.label_tag }}
                         {{ room_access_form.visibility }}
                         {% if room_access_form.visibility.help_text %}
@@ -93,13 +93,21 @@
                         {% endif %}
                         {{ room_access_form.visibility.errors }}
                     </div>
-                    <div class="col-lg-4">
+                    <div class="col-lg-3">
                         {{ room_access_form.posting_policy.label_tag }}
                         {{ room_access_form.posting_policy }}
                         {% if room_access_form.posting_policy.help_text %}
                             <div class="form-text">{{ room_access_form.posting_policy.help_text }}</div>
                         {% endif %}
                         {{ room_access_form.posting_policy.errors }}
+                    </div>
+                    <div class="col-lg-3">
+                        {{ room_access_form.join_policy.label_tag }}
+                        {{ room_access_form.join_policy }}
+                        {% if room_access_form.join_policy.help_text %}
+                            <div class="form-text">{{ room_access_form.join_policy.help_text }}</div>
+                        {% endif %}
+                        {{ room_access_form.join_policy.errors }}
                     </div>
                 </div>
                 <div class="nt-form-actions">
@@ -157,6 +165,7 @@
                                             <div class="small mt-1">
                                                 <span class="badge text-bg-light border">{{ room.get_visibility_display }}</span>
                                                 <span class="badge text-bg-light border">{{ room.get_posting_policy_display }}</span>
+                                                <span class="badge text-bg-light border">{{ room.get_join_policy_display }}</span>
                                             </div>
                                         </div>
                                         <div class="nt-inline-actions">

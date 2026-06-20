@@ -1,6 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
+from django.utils import timezone
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
@@ -10,8 +11,8 @@ from messages_app.forms import MessageForm
 from notifications_app.services import create_message_notifications, create_room_notifications
 
 from .api_views import RoomDetailAPIView, RoomListAPIView, RoomMessagesAPIView
-from .forms import RoomFilterForm, RoomForm
-from .models import Membership, Room
+from .forms import RoomFilterForm, RoomForm, RoomInvitationForm
+from .models import Membership, Room, RoomInvitation
 
 
 class RoomOwnerRequiredMixin(UserPassesTestMixin):
@@ -95,6 +96,11 @@ class RoomDetailView(DetailView):
         context["can_post_message"] = room.can_post(user=self.request.user, profile=user_profile)
         context["can_view_room"] = room.can_view(user=self.request.user, profile=user_profile)
         context["can_join_room"] = room.can_join(user=self.request.user, profile=user_profile)
+        context["requires_invite"] = room.join_policy == Room.JOIN_INVITE
+        context["invite_form"] = RoomInvitationForm(room=room)
+        context["pending_invites"] = room.invitations.select_related("invitee", "invited_by").filter(
+            accepted_at__isnull=True
+        )[:8]
         context["reaction_choices"] = [
             ("like", "Like"),
             ("love", "Love"),
@@ -190,6 +196,9 @@ class RoomJoinView(LoginRequiredMixin, View):
 
         room.members.add(profile)
         Membership.objects.get_or_create(profile=profile, room=room)
+        RoomInvitation.objects.filter(room=room, invitee=profile, accepted_at__isnull=True).update(
+            accepted_at=timezone.now()
+        )
         return redirect("room_detail", pk=room.pk)
 
 
@@ -201,4 +210,25 @@ class RoomLeaveView(LoginRequiredMixin, View):
         if room.creator_id != profile.pk:
             room.members.remove(profile)
             Membership.objects.filter(profile=profile, room=room).delete()
+        return redirect("room_detail", pk=room.pk)
+
+
+class RoomInviteView(LoginRequiredMixin, UserPassesTestMixin, View):
+    def test_func(self):
+        room = get_object_or_404(Room, pk=self.kwargs["pk"])
+        profile = ensure_user_profile(self.request.user)
+        return bool(self.request.user.is_staff or (profile and room.creator_id == profile.pk))
+
+    def post(self, request, pk):
+        room = get_object_or_404(Room, pk=pk)
+        inviter = ensure_user_profile(request.user)
+        form = RoomInvitationForm(request.POST, room=room)
+
+        if form.is_valid():
+            RoomInvitation.objects.get_or_create(
+                room=room,
+                invitee=form.cleaned_data["invitee"],
+                defaults={"invited_by": inviter},
+            )
+
         return redirect("room_detail", pk=room.pk)

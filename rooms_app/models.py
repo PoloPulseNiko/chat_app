@@ -44,6 +44,14 @@ class Room(models.Model):
         (POSTING_STAFF, "Staff only"),
     ]
 
+    JOIN_OPEN = "open"
+    JOIN_INVITE = "invite"
+
+    JOIN_CHOICES = [
+        (JOIN_OPEN, "Anyone can join"),
+        (JOIN_INVITE, "Invite required"),
+    ]
+
     name = models.CharField(max_length=100)
     description = models.TextField()
     creator = models.ForeignKey("profiles_app.Profile", on_delete=models.CASCADE)
@@ -66,6 +74,11 @@ class Room(models.Model):
         choices=POSTING_CHOICES,
         default=POSTING_MEMBERS,
     )
+    join_policy = models.CharField(
+        max_length=20,
+        choices=JOIN_CHOICES,
+        default=JOIN_OPEN,
+    )
 
     def __str__(self):
         return self.name
@@ -82,20 +95,27 @@ class Room(models.Model):
             return True
         return self.memberships.filter(profile=profile, role=Membership.MODERATOR).exists()
 
+    def has_pending_invite(self, profile):
+        if not profile:
+            return False
+        return self.invitations.filter(invitee=profile, accepted_at__isnull=True).exists()
+
     def can_view(self, user=None, profile=None):
         if user and user.is_staff:
             return True
         if self.visibility == self.VISIBILITY_PUBLIC:
             return True
         if self.visibility == self.VISIBILITY_PRIVATE:
-            return self.is_member(profile)
+            return self.is_member(profile) or self.has_pending_invite(profile)
         return False
 
     def can_join(self, user=None, profile=None):
         if not profile or (user and user.is_staff):
             return False
-        if self.visibility != self.VISIBILITY_PUBLIC:
+        if not self.can_view(user=user, profile=profile):
             return False
+        if self.join_policy == self.JOIN_INVITE:
+            return self.has_pending_invite(profile)
         return not self.is_member(profile)
 
     def can_post(self, user=None, profile=None):
@@ -138,3 +158,32 @@ class Membership(models.Model):
 
     def __str__(self):
         return f"{self.profile} in {self.room}"
+
+
+class RoomInvitation(models.Model):
+    room = models.ForeignKey(
+        Room,
+        on_delete=models.CASCADE,
+        related_name="invitations",
+    )
+    invitee = models.ForeignKey(
+        "profiles_app.Profile",
+        on_delete=models.CASCADE,
+        related_name="room_invitations",
+    )
+    invited_by = models.ForeignKey(
+        "profiles_app.Profile",
+        on_delete=models.SET_NULL,
+        related_name="sent_room_invitations",
+        null=True,
+        blank=True,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    accepted_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ("room", "invitee")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.invitee} invited to {self.room}"

@@ -33,6 +33,11 @@ class RoomAccessControlForm(forms.Form):
         label="Who Can Post",
         help_text="Control who can send messages in this room.",
     )
+    join_policy = forms.ChoiceField(
+        choices=Room.JOIN_CHOICES,
+        label="Join Policy",
+        help_text="Control whether users can join directly or need an invite.",
+    )
 
     def clean(self):
         cleaned_data = super().clean()
@@ -42,4 +47,6 @@ class RoomAccessControlForm(forms.Form):
                 cleaned_data["visibility"] = room.visibility
             if "posting_policy" not in cleaned_data or not cleaned_data["posting_policy"]:
                 cleaned_data["posting_policy"] = room.posting_policy
+            if "join_policy" not in cleaned_data or not cleaned_data["join_policy"]:
+                cleaned_data["join_policy"] = room.join_policy
         return cleaned_data

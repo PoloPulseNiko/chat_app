@@ -214,8 +214,39 @@
             height: auto;
         }
 
-        .rounded-circle {
+        .nt-avatar-frame {
+            display: inline-block;
+            width: 48px;
+            height: 48px;
+            line-height: 48px;
+            text-align: center;
+            overflow: hidden;
+            border-radius: 50%;
+            background: var(--nt-accent-soft);
+            border: 1px solid var(--nt-border);
             flex-shrink: 0;
+            vertical-align: middle;
+        }
+
+        .nt-avatar-frame img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            vertical-align: middle;
+        }
+
+        .nt-avatar-frame-sm {
+            width: 42px;
+            height: 42px;
+            line-height: 42px;
+        }
+
+        .nt-avatar-frame-lg {
+            width: 180px;
+            height: 180px;
+            line-height: 180px;
+            border-radius: 12px;
         }
 
         .nt-section-header,
@@ -456,8 +487,8 @@
                 width: 100%;
             }
 
-            .nt-message-row .rounded-circle,
-            .nt-profile-row .rounded-circle {
+            .nt-message-row .nt-avatar-frame,
+            .nt-profile-row .nt-avatar-frame {
                 align-self: flex-start;
             }
 
@@ -529,6 +560,7 @@
                 {% if user.is_authenticated %}
                     <li><a class="nt-nav-link" href="{% url 'profile_list' %}">Profiles</a></li>
                     <li><a class="nt-nav-link" href="{% url 'room_list' %}">Rooms</a></li>
+                    <li><a class="nt-nav-link" href="{% url 'direct_conversation_list' %}">Messages</a></li>
                 {% endif %}
             </ul>
             <ul class="nt-nav-actions">

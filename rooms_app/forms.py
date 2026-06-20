@@ -1,11 +1,13 @@
 from django import forms
+from profiles_app.models import Profile
+
 from .models import Category, Room, Tag
 
 
 class RoomForm(forms.ModelForm):
     class Meta:
         model = Room
-        fields = ["name", "description", "category", "tags", "visibility", "posting_policy"]
+        fields = ["name", "description", "category", "tags", "visibility", "posting_policy", "join_policy"]
         labels = {
             "name": "Room Name",
             "description": "Description",
@@ -13,6 +15,7 @@ class RoomForm(forms.ModelForm):
             "tags": "Tags",
             "visibility": "Visibility",
             "posting_policy": "Who Can Post",
+            "join_policy": "Join Policy",
         }
         help_texts = {
             "name": "Enter a unique room name (3-100 characters)",
@@ -21,6 +24,7 @@ class RoomForm(forms.ModelForm):
             "tags": "Assign a few tags to make the room easier to discover",
             "visibility": "Staff can decide whether a room is public, private, or staff-only.",
             "posting_policy": "Staff can control who is allowed to send messages in this room.",
+            "join_policy": "Choose whether users can join freely or need an invite.",
         }
         widgets = {
             "name": forms.TextInput(attrs={"placeholder": "My Awesome Room", "maxlength": "100"}),
@@ -36,6 +40,7 @@ class RoomForm(forms.ModelForm):
         if not (user and user.is_staff):
             self.fields.pop("visibility")
             self.fields.pop("posting_policy")
+            self.fields.pop("join_policy")
 
     def clean_name(self):
         name = self.cleaned_data.get("name")
@@ -66,3 +71,18 @@ class RoomFilterForm(forms.Form):
         if search and len(search) < 2:
             raise forms.ValidationError("Search term must be at least 2 characters long.")
         return search
+
+
+class RoomInvitationForm(forms.Form):
+    invitee = forms.ModelChoiceField(
+        queryset=Profile.objects.none(),
+        label="Invite Profile",
+        empty_label="Choose a profile",
+    )
+
+    def __init__(self, *args, room=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        queryset = Profile.objects.all().order_by("nickname")
+        if room:
+            queryset = queryset.exclude(pk__in=room.members.values_list("pk", flat=True))
+        self.fields["invitee"].queryset = queryset

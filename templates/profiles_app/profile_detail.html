@@ -6,12 +6,12 @@
 <div class="container mt-4">
     <h2>{{ profile.nickname }}</h2>
     {% if profile.avatar %}
-        <img
-            src="{{ profile.avatar.url }}"
-            alt="{{ profile.nickname }} profile picture"
-            class="img-thumbnail mb-3"
-            style="max-width: 180px; max-height: 180px; object-fit: cover;"
-        >
+        <span class="nt-avatar-frame nt-avatar-frame-lg mb-3">
+            <img
+                src="{{ profile.avatar.url }}"
+                alt="{{ profile.nickname }} profile picture"
+            >
+        </span>
     {% endif %}
     <p>{{ profile.bio|default:"No bio provided." }}</p>
 

@@ -12,4 +12,5 @@ urlpatterns = [
     path("<int:pk>/delete/", views.RoomDeleteView.as_view(), name="room_delete"),
     path("<int:pk>/join/", views.RoomJoinView.as_view(), name="room_join"),
     path("<int:pk>/leave/", views.RoomLeaveView.as_view(), name="room_leave"),
+    path("<int:pk>/invite/", views.RoomInviteView.as_view(), name="room_invite"),
 ]

@@ -17,12 +17,12 @@
         <p class="card-text">{{ room.description }}</p>
         <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
           {% if room.creator.avatar %}
-            <img
-              src="{{ room.creator.avatar.url }}"
-              alt="{{ room.creator.nickname }} profile picture"
-              class="rounded-circle"
-              style="width: 42px; height: 42px; object-fit: cover;"
-            >
+            <span class="nt-avatar-frame nt-avatar-frame-sm">
+              <img
+                src="{{ room.creator.avatar.url }}"
+                alt="{{ room.creator.nickname }} profile picture"
+              >
+            </span>
           {% endif %}
           <p class="text-muted mb-0">Created by: {{ room.creator.nickname }}</p>
         </div>
@@ -44,6 +44,12 @@
             <span class="badge text-bg-secondary">Moderators Can Post</span>
           {% else %}
             <span class="badge text-bg-danger">Staff Can Post</span>
+          {% endif %}
+
+          {% if room.join_policy == "invite" %}
+            <span class="badge text-bg-info">Invite Required</span>
+          {% else %}
+            <span class="badge text-bg-light border">Open Join</span>
           {% endif %}
         </div>
         {% if room.tags.exists %}
@@ -69,13 +75,47 @@
           {% elif can_join_room %}
             <form action="{% url 'room_join' room.pk %}" method="post">
               {% csrf_token %}
-              <button type="submit" class="btn btn-success btn-sm">Join Room</button>
+              <button type="submit" class="btn btn-success btn-sm">
+                {% if requires_invite %}Accept Invite{% else %}Join Room{% endif %}
+              </button>
             </form>
           {% endif %}
         </div>
       {% endif %}
     </div>
   </div>
+
+  {% if can_manage_room %}
+    <details class="card mb-4">
+      <summary class="nt-compact-toggle m-3 mb-0">Room Invitations</summary>
+      <div class="card-body">
+        <form action="{% url 'room_invite' room.pk %}" method="post" class="mb-3">
+          {% csrf_token %}
+          <div class="row g-3 align-items-end">
+            <div class="col-md-8">
+              {{ invite_form.invitee.label_tag }}
+              {{ invite_form.invitee }}
+              {{ invite_form.invitee.errors }}
+            </div>
+            <div class="col-md-4">
+              <button type="submit" class="btn btn-primary">Send Invite</button>
+            </div>
+          </div>
+        </form>
+
+        {% if pending_invites %}
+          <p class="text-muted mb-2">Pending invites</p>
+          <div class="d-flex flex-wrap gap-2">
+            {% for invitation in pending_invites %}
+              <span class="badge text-bg-light border">{{ invitation.invitee.nickname }}</span>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted mb-0">No pending invites for this room.</p>
+        {% endif %}
+      </div>
+    </details>
+  {% endif %}
 
   <h4>Messages</h4>
   <div
@@ -87,12 +127,12 @@
       <div class="list-group-item">
         <div class="nt-message-row">
           {% if message.sender.avatar %}
-            <img
-              src="{{ message.sender.avatar.url }}"
-              alt="{{ message.sender.nickname }} profile picture"
-              class="rounded-circle"
-              style="width: 46px; height: 46px; object-fit: cover;"
-            >
+            <span class="nt-avatar-frame">
+              <img
+                src="{{ message.sender.avatar.url }}"
+                alt="{{ message.sender.nickname }} profile picture"
+              >
+            </span>
           {% endif %}
           <div class="flex-grow-1">
             <div class="d-flex flex-wrap align-items-center gap-2">

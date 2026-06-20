@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Private Messages{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="mb-1">Private Messages</h2>
+            <p class="text-muted mb-0">Search for a profile and start a one-to-one conversation.</p>
+        </div>
+    </div>
+
+    <form method="get" class="card mb-4">
+        <div class="card-body">
+            <label for="profile-search">Find a profile</label>
+            <div class="row g-3 align-items-end">
+                <div class="col-md-9">
+                    <input
+                        type="text"
+                        id="profile-search"
+                        name="q"
+                        value="{{ query }}"
+                        placeholder="Search by nickname or username"
+                    >
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    {% if query %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3 class="h5">Search Results</h3>
+                {% if profiles %}
+                    <div class="list-group list-group-flush">
+                        {% for found_profile in profiles %}
+                            <div class="list-group-item px-0">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div>
+                                        <strong>{{ found_profile.nickname }}</strong>
+                                        <div class="text-muted small">{{ found_profile.user.username }}</div>
+                                    </div>
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="profile_id" value="{{ found_profile.pk }}">
+                                        <button type="submit" class="btn btn-sm btn-primary">Message</button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No profiles matched your search.</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    <h3 class="h5">Your Conversations</h3>
+    <div class="list-group">
+        {% for row in conversation_rows %}
+            <a href="{% url 'direct_conversation_detail' row.conversation.pk %}" class="list-group-item list-group-item-action">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                    <div>
+                        <strong>{{ row.other_profile.nickname|default:"Unknown profile" }}</strong>
+                        {% if row.last_message %}
+                            <p class="mb-0 text-muted">{{ row.last_message.text|truncatewords:14 }}</p>
+                        {% else %}
+                            <p class="mb-0 text-muted">No messages yet.</p>
+                        {% endif %}
+                    </div>
+                    <small class="text-muted">{{ row.conversation.updated_at|date:"M d, H:i" }}</small>
+                </div>
+            </a>
+        {% empty %}
+            <p class="text-muted">No private conversations yet. Search for someone above to start one.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

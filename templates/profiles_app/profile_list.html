@@ -12,12 +12,12 @@
             <a href="{% url 'profile_detail' profile.pk %}" class="list-group-item list-group-item-action">
                 <div class="nt-profile-row">
                     {% if profile.avatar %}
-                        <img
-                            src="{{ profile.avatar.url }}"
-                            alt="{{ profile.nickname }} profile picture"
-                            class="rounded-circle"
-                            style="width: 48px; height: 48px; object-fit: cover;"
-                        >
+                        <span class="nt-avatar-frame">
+                            <img
+                                src="{{ profile.avatar.url }}"
+                                alt="{{ profile.nickname }} profile picture"
+                            >
+                        </span>
                     {% endif %}
                     <div class="min-w-0">
                         <strong>{{ profile.nickname }}</strong>

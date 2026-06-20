@@ -1,13 +1,15 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import DeleteView, UpdateView
+from django.views.generic import DeleteView, DetailView, TemplateView, UpdateView
 
 from accounts_app.services import ensure_user_profile
+from profiles_app.models import Profile
 
-from .forms import MessageForm
-from .models import Message, Reaction
+from .forms import DirectMessageForm, MessageForm
+from .models import DirectConversation, DirectMessage, Message, Reaction
 
 
 class MessageAuthorRequiredMixin(UserPassesTestMixin):
@@ -54,3 +56,101 @@ class MessageReactionToggleView(LoginRequiredMixin, View):
             reaction.delete()
 
         return redirect("room_detail", pk=message.room.pk)
+
+
+class DirectConversationListView(LoginRequiredMixin, TemplateView):
+    template_name = "messages_app/direct_conversation_list.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        profile = ensure_user_profile(self.request.user)
+        query = self.request.GET.get("q", "").strip()
+
+        conversations = DirectConversation.objects.filter(participants=profile).prefetch_related(
+            "participants",
+            "direct_messages",
+        )
+        conversation_rows = [
+            {
+                "conversation": conversation,
+                "other_profile": conversation.other_participant(profile),
+                "last_message": conversation.direct_messages.order_by("-created_at").first(),
+            }
+            for conversation in conversations
+        ]
+        profiles = Profile.objects.exclude(pk=profile.pk).order_by("nickname")
+        if query:
+            profiles = profiles.filter(Q(nickname__icontains=query) | Q(user__username__icontains=query))
+
+        context.update(
+            {
+                "profile": profile,
+                "conversation_rows": conversation_rows,
+                "profiles": profiles[:12],
+                "query": query,
+            }
+        )
+        return context
+
+    def post(self, request):
+        profile = ensure_user_profile(request.user)
+        other_profile = get_object_or_404(Profile, pk=request.POST.get("profile_id"))
+        if other_profile == profile:
+            return redirect("direct_conversation_list")
+
+        conversation = (
+            DirectConversation.objects.filter(participants=profile)
+            .filter(participants=other_profile)
+            .first()
+        )
+        if not conversation:
+            conversation = DirectConversation.objects.create()
+            conversation.participants.add(profile, other_profile)
+
+        return redirect("direct_conversation_detail", pk=conversation.pk)
+
+
+class DirectConversationDetailView(LoginRequiredMixin, DetailView):
+    model = DirectConversation
+    template_name = "messages_app/direct_conversation_detail.html"
+    context_object_name = "conversation"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        profile = ensure_user_profile(request.user)
+        if not self.object.participants.filter(pk=profile.pk).exists():
+            return redirect("direct_conversation_list")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return DirectConversation.objects.prefetch_related("participants", "direct_messages__sender")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        profile = ensure_user_profile(self.request.user)
+        context.update(
+            {
+                "profile": profile,
+                "other_profile": self.object.other_participant(profile),
+                "direct_messages": self.object.direct_messages.select_related("sender"),
+                "form": kwargs.get("form", DirectMessageForm()),
+            }
+        )
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        profile = ensure_user_profile(request.user)
+        if not self.object.participants.filter(pk=profile.pk).exists():
+            return redirect("direct_conversation_list")
+
+        form = DirectMessageForm(request.POST)
+        if form.is_valid():
+            direct_message = form.save(commit=False)
+            direct_message.conversation = self.object
+            direct_message.sender = profile
+            direct_message.save()
+            self.object.save(update_fields=["updated_at"])
+            return redirect("direct_conversation_detail", pk=self.object.pk)
+
+        return self.render_to_response(self.get_context_data(form=form))

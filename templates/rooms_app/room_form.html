@@ -145,6 +145,14 @@
                                         {{ form.posting_policy.errors }}
                                     </div>
                                 {% endif %}
+                                {% if form.join_policy %}
+                                    <div class="mb-3 mb-0">
+                                        {{ form.join_policy.label_tag }}
+                                        {{ form.join_policy }}
+                                        {% if form.join_policy.help_text %}<div class="form-text">{{ form.join_policy.help_text }}</div>{% endif %}
+                                        {{ form.join_policy.errors }}
+                                    </div>
+                                {% endif %}
                             </div>
                             <div class="mb-3 mb-md-0 nt-room-tag-list">
                                 {{ form.tags.label_tag }}

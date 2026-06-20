@@ -114,6 +114,9 @@
                             {% elif room.posting_policy == "staff" %}
                                 <span class="badge text-bg-danger">Staff Post</span>
                             {% endif %}
+                            {% if room.join_policy == "invite" %}
+                                <span class="badge text-bg-info">Invite Only</span>
+                            {% endif %}
                         </div>
                     </div>
                     <small class="text-muted">Created by {{ room.creator.nickname }}</small>

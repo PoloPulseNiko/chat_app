@@ -67,6 +67,7 @@ class StaffRoomAccessUpdateView(StaffRequiredMixin, View):
             room = form.cleaned_data["room"]
             room.visibility = form.cleaned_data["visibility"]
             room.posting_policy = form.cleaned_data["posting_policy"]
-            room.save(update_fields=["visibility", "posting_policy"])
+            room.join_policy = form.cleaned_data["join_policy"]
+            room.save(update_fields=["visibility", "posting_policy", "join_policy"])
             return redirect("staff_dashboard")
         return StaffDashboardView.as_view()(request, room_access_form=form)

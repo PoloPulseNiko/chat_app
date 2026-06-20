@@ -41,3 +41,42 @@ class Reaction(models.Model):
 
     def __str__(self):
         return f"{self.profile} reacted to message {self.message_id}"
+
+
+class DirectConversation(models.Model):
+    participants = models.ManyToManyField(
+        "profiles_app.Profile",
+        related_name="direct_conversations",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-updated_at"]
+
+    def __str__(self):
+        return "Direct conversation"
+
+    def other_participant(self, profile):
+        return self.participants.exclude(pk=profile.pk).first()
+
+
+class DirectMessage(models.Model):
+    conversation = models.ForeignKey(
+        DirectConversation,
+        on_delete=models.CASCADE,
+        related_name="direct_messages",
+    )
+    sender = models.ForeignKey(
+        "profiles_app.Profile",
+        on_delete=models.CASCADE,
+        related_name="sent_direct_messages",
+    )
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.sender} in direct conversation {self.conversation_id}"
