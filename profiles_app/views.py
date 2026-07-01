@@ -12,6 +12,17 @@ from .forms import ProfileForm
 from .models import Profile
 
 
+def _dedupe_rooms(rooms):
+    deduped = []
+    seen_ids = set()
+    for room in rooms:
+        if room.pk in seen_ids:
+            continue
+        seen_ids.add(room.pk)
+        deduped.append(room)
+    return deduped
+
+
 class ProfileOwnerRequiredMixin(UserPassesTestMixin):
     def test_func(self):
         profile = self.get_object()
@@ -83,8 +94,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         profile = ensure_user_profile(self.request.user)
 
-        created_rooms = Room.objects.filter(creator=profile).select_related("category").distinct()
-        joined_rooms = (
+        created_rooms = _dedupe_rooms(
+            Room.objects.filter(creator=profile).select_related("category").distinct()
+        )
+        joined_rooms = _dedupe_rooms(
             Room.objects.filter(members=profile)
             .exclude(creator=profile)
             .select_related("category")

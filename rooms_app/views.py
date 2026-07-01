@@ -20,6 +20,17 @@ from .forms import RoomFilterForm, RoomForm, RoomInvitationForm
 from .models import Membership, Room, RoomInvitation
 
 
+def _dedupe_rooms(rooms):
+    deduped = []
+    seen_ids = set()
+    for room in rooms:
+        if room.pk in seen_ids:
+            continue
+        seen_ids.add(room.pk)
+        deduped.append(room)
+    return deduped
+
+
 class RoomOwnerRequiredMixin(UserPassesTestMixin):
     def test_func(self):
         if self.request.user.is_staff:
@@ -66,7 +77,7 @@ class RoomListView(LoginRequiredMixin, ListView):
 
             visible_rooms = visible_rooms.order_by(sort).distinct()
 
-        return visible_rooms
+        return _dedupe_rooms(visible_rooms)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from accounts_app.models import ChatUser
+from rooms_app.models import Room
 
 
 class ProfileTests(TestCase):
@@ -20,6 +21,13 @@ class ProfileTests(TestCase):
     def test_dashboard_requires_login(self):
         response = self.client.get(reverse("dashboard"))
         self.assertEqual(response.status_code, 302)
+
+    def test_dashboard_does_not_duplicate_rooms(self):
+        room = Room.objects.create(name="Alpha", description="Alpha room", creator=self.user.profile)
+        room.members.add(self.user.profile)
+        self.client.login(username="niko", password="pass12345")
+        response = self.client.get(reverse("dashboard"), secure=True)
+        self.assertEqual(response.content.decode().count("Alpha"), 1)
 
     def test_profile_owner_can_edit(self):
         self.client.login(username="niko", password="pass12345")

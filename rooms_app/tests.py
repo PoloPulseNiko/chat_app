@@ -25,6 +25,12 @@ class RoomTests(TestCase):
         response = self.client.get(reverse("room_list"), {"category": self.category.pk}, secure=True)
         self.assertContains(response, "Django Room")
 
+    def test_room_list_does_not_duplicate_rooms(self):
+        self.room.members.add(self.member.profile)
+        self.client.login(username="member", password="pass12345")
+        response = self.client.get(reverse("room_list"), secure=True)
+        self.assertEqual(response.content.decode().count("Django Room"), 1)
+
     def test_room_create_adds_owner_membership(self):
         self.client.login(username="member", password="pass12345")
         response = self.client.post(
