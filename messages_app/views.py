@@ -6,6 +6,7 @@ from django.views import View
 from django.views.generic import DeleteView, DetailView, TemplateView, UpdateView
 
 from accounts_app.services import ensure_user_profile
+from notifications_app.services import create_direct_message_notifications
 from profiles_app.models import Profile
 
 from .forms import DirectMessageForm, MessageForm
@@ -151,6 +152,7 @@ class DirectConversationDetailView(LoginRequiredMixin, DetailView):
             direct_message.sender = profile
             direct_message.save()
             self.object.save(update_fields=["updated_at"])
+            create_direct_message_notifications(direct_message)
             return redirect("direct_conversation_detail", pk=self.object.pk)
 
         return self.render_to_response(self.get_context_data(form=form))

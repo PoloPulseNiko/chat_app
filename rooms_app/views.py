@@ -8,7 +8,12 @@ from django.views.generic import CreateView, DeleteView, DetailView, ListView, U
 
 from accounts_app.services import ensure_user_profile
 from messages_app.forms import MessageForm
-from notifications_app.services import create_message_notifications, create_room_notifications
+from notifications_app.models import Notification
+from notifications_app.services import (
+    create_invitation_notifications,
+    create_message_notifications,
+    create_room_notifications,
+)
 
 from .api_views import RoomDetailAPIView, RoomListAPIView, RoomMessagesAPIView
 from .forms import RoomFilterForm, RoomForm, RoomInvitationForm
@@ -199,6 +204,12 @@ class RoomJoinView(LoginRequiredMixin, View):
         RoomInvitation.objects.filter(room=room, invitee=profile, accepted_at__isnull=True).update(
             accepted_at=timezone.now()
         )
+        Notification.objects.filter(
+            recipient=profile,
+            room=room,
+            notification_type=Notification.INVITE,
+            is_read=False,
+        ).update(is_read=True)
         return redirect("room_detail", pk=room.pk)
 
 
@@ -225,10 +236,11 @@ class RoomInviteView(LoginRequiredMixin, UserPassesTestMixin, View):
         form = RoomInvitationForm(request.POST, room=room)
 
         if form.is_valid():
-            RoomInvitation.objects.get_or_create(
+            invitation, _ = RoomInvitation.objects.update_or_create(
                 room=room,
                 invitee=form.cleaned_data["invitee"],
-                defaults={"invited_by": inviter},
+                defaults={"invited_by": inviter, "accepted_at": None},
             )
+            create_invitation_notifications(invitation)
 
         return redirect("room_detail", pk=room.pk)

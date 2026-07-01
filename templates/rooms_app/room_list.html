@@ -102,7 +102,10 @@
             {% for room in rooms %}
                 <a href="{% url 'room_detail' room.pk %}" class="list-group-item list-group-item-action">
                     <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-                        <h5 class="mb-1">{{ room.name }}</h5>
+                        <div>
+                            <h5 class="mb-1">{{ room.name }}</h5>
+                            <small class="text-muted">Created by {{ room.creator.nickname }}</small>
+                        </div>
                         <div class="d-flex flex-wrap gap-2">
                             {% if room.visibility == "private" %}
                                 <span class="badge text-bg-warning">Private</span>
@@ -119,7 +122,6 @@
                             {% endif %}
                         </div>
                     </div>
-                    <small class="text-muted">Created by {{ room.creator.nickname }}</small>
                     <p class="mb-1">{{ room.description|truncatewords:15 }}</p>
                     {% if room.tags.exists %}
                         <small class="text-muted">Tags:
@@ -127,6 +129,12 @@
                                 {{ tag.name }}{% if not forloop.last %}, {% endif %}
                             {% endfor %}
                         </small>
+                    {% endif %}
+                    {% if user.is_staff or current_profile == room.creator %}
+                        <div class="nt-inline-actions mt-2">
+                            <a href="{% url 'room_edit' room.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <a href="{% url 'room_delete' room.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                        </div>
                     {% endif %}
                 </a>
             {% empty %}

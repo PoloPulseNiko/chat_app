@@ -16,7 +16,7 @@ class NotificationListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         profile = ensure_user_profile(self.request.user)
-        queryset = profile.notifications.select_related("actor", "room", "message")
+        queryset = profile.notifications.select_related("actor", "room", "message", "direct_message")
         self.filter_form = NotificationFilterForm(self.request.GET or None)
         if self.filter_form.is_valid():
             notification_type = self.filter_form.cleaned_data.get("notification_type")

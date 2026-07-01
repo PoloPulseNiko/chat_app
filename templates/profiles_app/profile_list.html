@@ -10,19 +10,27 @@
     <div class="list-group">
         {% for profile in profiles %}
             <a href="{% url 'profile_detail' profile.pk %}" class="list-group-item list-group-item-action">
-                <div class="nt-profile-row">
-                    {% if profile.avatar %}
-                        <span class="nt-avatar-frame">
-                            <img
-                                src="{{ profile.avatar.url }}"
-                                alt="{{ profile.nickname }} profile picture"
-                            >
-                        </span>
-                    {% endif %}
-                    <div class="min-w-0">
-                        <strong>{{ profile.nickname }}</strong>
-                        <p class="mb-0">{{ profile.bio|truncatewords:15 }}</p>
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                    <div class="nt-profile-row">
+                        {% if profile.avatar %}
+                            <span class="nt-avatar-frame">
+                                <img
+                                    src="{{ profile.avatar.url }}"
+                                    alt="{{ profile.nickname }} profile picture"
+                                >
+                            </span>
+                        {% endif %}
+                        <div class="min-w-0">
+                            <strong>{{ profile.nickname }}</strong>
+                            <p class="mb-0">{{ profile.bio|truncatewords:15 }}</p>
+                        </div>
                     </div>
+                    {% if user.is_staff or current_profile == profile %}
+                        <div class="nt-inline-actions">
+                            <a href="{% url 'profile_edit' profile.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <a href="{% url 'profile_delete' profile.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                        </div>
+                    {% endif %}
                 </div>
             </a>
         {% empty %}

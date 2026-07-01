@@ -124,7 +124,7 @@
     style="max-height: min(62vh, 38rem); scroll-behavior: smooth;"
   >
     {% for message in messages %}
-      <div class="list-group-item">
+      <div class="list-group-item" id="message-{{ message.pk }}">
         <div class="nt-message-row">
           {% if message.sender.avatar %}
             <span class="nt-avatar-frame">

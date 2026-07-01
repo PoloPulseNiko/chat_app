@@ -18,7 +18,7 @@
         style="max-height: min(62vh, 38rem); scroll-behavior: smooth;"
     >
         {% for direct_message in direct_messages %}
-            <div class="list-group-item">
+            <div class="list-group-item" id="direct-message-{{ direct_message.pk }}">
                 <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
                     <div>
                         <strong>{{ direct_message.sender.nickname }}</strong>
@@ -55,6 +55,13 @@
             window.requestAnimationFrame(function () {
                 messageList.scrollTop = messageList.scrollHeight;
             });
+        }
+
+        if (window.location.hash && messageList) {
+            var target = document.getElementById(window.location.hash.substring(1));
+            if (target && target.offsetTop !== undefined) {
+                messageList.scrollTop = Math.max(0, target.offsetTop - 16);
+            }
         }
     })();
 </script>
