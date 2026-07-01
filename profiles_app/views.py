@@ -6,7 +6,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, ListView, T
 from accounts_app.services import ensure_user_profile
 from messages_app.models import Message
 from notifications_app.models import Notification
-from rooms_app.models import Membership, Room
+from rooms_app.models import Room
 
 from .forms import ProfileForm
 from .models import Profile
@@ -83,9 +83,13 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         profile = ensure_user_profile(self.request.user)
 
-        created_rooms = Room.objects.filter(creator=profile).select_related("category")
-        memberships = Membership.objects.filter(profile=profile).select_related("room", "room__category")
-        joined_rooms = [membership.room for membership in memberships if membership.room.creator_id != profile.pk]
+        created_rooms = Room.objects.filter(creator=profile).select_related("category").distinct()
+        joined_rooms = (
+            Room.objects.filter(members=profile)
+            .exclude(creator=profile)
+            .select_related("category")
+            .distinct()
+        )
         recent_messages = Message.objects.filter(sender=profile).select_related("room").order_by("-created_at")[:5]
         notifications = Notification.objects.filter(recipient=profile).select_related("actor", "room").order_by("-created_at")[:5]
 

@@ -43,6 +43,36 @@ class RoomTests(TestCase):
         self.assertRedirects(response, reverse("room_detail", args=[self.room.pk]))
         self.assertTrue(self.room.members.filter(pk=self.member.profile.pk).exists())
 
+    def test_room_owner_can_toggle_join_policy(self):
+        self.client.login(username="owner", password="pass12345")
+        response = self.client.post(
+            reverse("room_edit", args=[self.room.pk]),
+            {
+                "name": self.room.name,
+                "description": self.room.description,
+                "category": self.category.pk,
+                "tags": [self.tag.pk],
+                "join_policy": Room.JOIN_INVITE,
+            },
+            secure=True,
+        )
+        self.assertRedirects(response, reverse("room_detail", args=[self.room.pk]), fetch_redirect_response=False)
+        self.room.refresh_from_db()
+        self.assertEqual(self.room.join_policy, Room.JOIN_INVITE)
+
+    def test_inviting_someone_does_not_change_join_policy(self):
+        self.room.join_policy = Room.JOIN_OPEN
+        self.room.save(update_fields=["join_policy"])
+        self.client.login(username="owner", password="pass12345")
+        response = self.client.post(
+            reverse("room_invite", args=[self.room.pk]),
+            {"invitee": self.member.profile.pk},
+            secure=True,
+        )
+        self.assertRedirects(response, reverse("room_detail", args=[self.room.pk]), fetch_redirect_response=False)
+        self.room.refresh_from_db()
+        self.assertEqual(self.room.join_policy, Room.JOIN_OPEN)
+
     def test_non_member_cannot_see_room_messages(self):
         Message.objects.create(sender=self.owner.profile, room=self.room, text="Secret room text")
         self.client.login(username="member", password="pass12345")

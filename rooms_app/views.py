@@ -247,9 +247,6 @@ class RoomInviteView(LoginRequiredMixin, UserPassesTestMixin, View):
                 invitee=form.cleaned_data["invitee"],
                 defaults={"invited_by": inviter, "accepted_at": None},
             )
-            if room.join_policy != Room.JOIN_INVITE:
-                room.join_policy = Room.JOIN_INVITE
-                room.save(update_fields=["join_policy"])
             create_invitation_notifications(invitation)
 
         return redirect("room_detail", pk=room.pk)

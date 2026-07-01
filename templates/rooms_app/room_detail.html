@@ -279,7 +279,32 @@
       window.requestAnimationFrame(scrollMessagesToBottom);
     }
 
-    window.setInterval(checkForNewMessages, 5000);
+    let refreshTimer = null;
+
+    function startRefreshLoop() {
+      if (document.hidden || refreshTimer !== null) {
+        return;
+      }
+
+      refreshTimer = window.setInterval(checkForNewMessages, 10000);
+    }
+
+    function stopRefreshLoop() {
+      if (refreshTimer !== null) {
+        window.clearInterval(refreshTimer);
+        refreshTimer = null;
+      }
+    }
+
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) {
+        stopRefreshLoop();
+      } else {
+        startRefreshLoop();
+      }
+    });
+
+    startRefreshLoop();
   })();
   </script>
   {% endif %}

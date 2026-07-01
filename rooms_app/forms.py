@@ -37,10 +37,13 @@ class RoomForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.pk:
             self.fields["name"].widget.attrs["readonly"] = True
-        if not (user and user.is_staff):
+        if not user:
             self.fields.pop("visibility")
             self.fields.pop("posting_policy")
             self.fields.pop("join_policy")
+        elif not user.is_staff:
+            self.fields.pop("visibility")
+            self.fields.pop("posting_policy")
 
     def clean_name(self):
         name = self.cleaned_data.get("name")

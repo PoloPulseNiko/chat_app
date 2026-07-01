@@ -57,14 +57,15 @@ async def _create_invitation_notifications(invitation):
 
 
 async def _create_room_notifications(room):
-    room_members = await sync_to_async(list)(room.members.exclude(pk=room.creator.pk))
+    creator = await sync_to_async(lambda: room.creator)()
+    room_members = await sync_to_async(list)(room.members.exclude(pk=room.creator_id))
     notifications = [
         Notification(
             recipient=member,
-            actor=room.creator,
+            actor=creator,
             room=room,
             notification_type=Notification.ROOM,
-            text=f"{room.creator.nickname} updated room {room.name}.",
+            text=f"{creator.nickname} updated room {room.name}.",
         )
         for member in room_members
     ]

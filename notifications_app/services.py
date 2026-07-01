@@ -1,4 +1,4 @@
-from .tasks import queue_broadcast_notifications, queue_message_notifications, queue_room_notifications
+from .tasks import queue_broadcast_notifications, queue_message_notifications
 from .models import Notification
 
 
@@ -22,7 +22,19 @@ def create_direct_message_notifications(direct_message):
 
 
 def create_room_notifications(room):
-    queue_room_notifications(room)
+    members = room.members.exclude(pk=room.creator_id)
+    notifications = [
+        Notification(
+            recipient=member,
+            actor=room.creator,
+            room=room,
+            notification_type=Notification.ROOM,
+            text=f"{room.creator.nickname} updated room {room.name}.",
+        )
+        for member in members
+    ]
+    if notifications:
+        Notification.objects.bulk_create(notifications)
 
 
 def create_broadcast_notifications(room, actor, text):
