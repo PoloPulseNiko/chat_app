@@ -142,7 +142,7 @@
                 <strong>{{ message.sender.nickname }}</strong>
                 <small class="text-muted">{{ message.created_at|date:"M d, Y H:i" }}</small>
               </div>
-              <p>{{ message.text }}</p>
+              <div class="nt-message-text">{{ message.text }}</div>
               {% if message.reactions.exists %}
                 <p class="mb-2 text-muted small">
                   Reactions: Like {{ message|reaction_count:"like" }}, Love {{ message|reaction_count:"love" }}, Laugh {{ message|reaction_count:"laugh" }}

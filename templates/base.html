@@ -285,6 +285,11 @@
             gap: 0.9rem;
         }
 
+        .nt-message-text {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
         .nt-auth-shell {
             max-width: 42rem;
             margin: 0 auto;
@@ -476,6 +481,21 @@
             .d-flex.gap-2,
             .d-flex.gap-3 {
                 gap: 0.45rem !important;
+            }
+
+            .nt-message-row,
+            .nt-profile-row {
+                display: block;
+            }
+
+            .nt-message-row > *,
+            .nt-profile-row > * {
+                margin-top: 0.5rem;
+            }
+
+            .nt-message-row > *:first-child,
+            .nt-profile-row > *:first-child {
+                margin-top: 0;
             }
         }
 

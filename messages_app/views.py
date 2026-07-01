@@ -153,6 +153,8 @@ class DirectConversationDetailView(LoginRequiredMixin, DetailView):
             direct_message.save()
             self.object.save(update_fields=["updated_at"])
             create_direct_message_notifications(direct_message)
-            return redirect("direct_conversation_detail", pk=self.object.pk)
+            return redirect(
+                f"{reverse_lazy('direct_conversation_detail', kwargs={'pk': self.object.pk})}#direct-message-{direct_message.pk}"
+            )
 
         return self.render_to_response(self.get_context_data(form=form))

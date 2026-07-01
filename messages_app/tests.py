@@ -21,23 +21,23 @@ class MessageTests(TestCase):
 
     def test_author_can_edit_message(self):
         self.client.login(username="author", password="pass12345")
-        response = self.client.post(reverse("message_edit", args=[self.message.pk]), {"text": "Edited"})
-        self.assertRedirects(response, reverse("room_detail", args=[self.room.pk]))
+        response = self.client.post(reverse("message_edit", args=[self.message.pk]), {"text": "Edited"}, secure=True)
+        self.assertRedirects(response, reverse("room_detail", args=[self.room.pk]), fetch_redirect_response=False)
         self.message.refresh_from_db()
         self.assertEqual(self.message.text, "Edited")
 
     def test_non_author_cannot_edit_message(self):
         self.client.login(username="other", password="pass12345")
-        response = self.client.get(reverse("message_edit", args=[self.message.pk]))
+        response = self.client.get(reverse("message_edit", args=[self.message.pk]), secure=True)
         self.assertEqual(response.status_code, 403)
 
     def test_reaction_toggle_creates_reaction(self):
         self.client.login(username="other", password="pass12345")
-        self.client.post(reverse("message_react", args=[self.message.pk, "like"]))
+        self.client.post(reverse("message_react", args=[self.message.pk, "like"]), secure=True)
         self.assertTrue(Reaction.objects.filter(message=self.message, profile=self.other.profile, reaction_type="like").exists())
 
     def test_reaction_toggle_removes_existing_reaction(self):
         Reaction.objects.create(message=self.message, profile=self.other.profile, reaction_type="like")
         self.client.login(username="other", password="pass12345")
-        self.client.post(reverse("message_react", args=[self.message.pk, "like"]))
+        self.client.post(reverse("message_react", args=[self.message.pk, "like"]), secure=True)
         self.assertFalse(Reaction.objects.filter(message=self.message, profile=self.other.profile, reaction_type="like").exists())

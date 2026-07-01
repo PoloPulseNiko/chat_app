@@ -91,7 +91,7 @@ class RoomTests(TestCase):
     def test_non_member_cannot_post_message(self):
         self.client.login(username="member", password="pass12345")
         response = self.client.post(reverse("room_detail", args=[self.room.pk]), {"text": "Hello"}, secure=True)
-        self.assertRedirects(response, reverse("room_detail", args=[self.room.pk]))
+        self.assertRedirects(response, reverse("room_detail", args=[self.room.pk]), fetch_redirect_response=False)
         self.assertEqual(self.room.messages.count(), 0)
 
     def test_room_api_returns_room_data(self):

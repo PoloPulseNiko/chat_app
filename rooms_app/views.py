@@ -141,7 +141,7 @@ class RoomDetailView(DetailView):
             message.room = self.object
             message.save()
             create_message_notifications(message)
-            return redirect("room_detail", pk=self.object.pk)
+            return redirect(f"{reverse_lazy('room_detail', kwargs={'pk': self.object.pk})}#message-{message.pk}")
 
         context = self.get_context_data(form=form)
         return self.render_to_response(context)
