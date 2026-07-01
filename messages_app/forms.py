@@ -6,7 +6,9 @@ class MessageForm(forms.ModelForm):
         model = Message
         fields = ["text"]
         widgets = {
-            "text": forms.Textarea(attrs={"placeholder": "Type your message...", "rows": 2}),
+            "text": forms.Textarea(
+                attrs={"placeholder": "Type your message...", "rows": 2, "class": "nt-send-on-enter"}
+            ),
         }
 
 
@@ -16,7 +18,9 @@ class DirectMessageForm(forms.ModelForm):
         fields = ["text"]
         labels = {"text": "Message"}
         widgets = {
-            "text": forms.Textarea(attrs={"placeholder": "Type a private message...", "rows": 2}),
+            "text": forms.Textarea(
+                attrs={"placeholder": "Type a private message...", "rows": 2, "class": "nt-send-on-enter"}
+            ),
         }
 
     def clean_text(self):
