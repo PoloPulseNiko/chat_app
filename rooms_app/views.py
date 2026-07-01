@@ -91,13 +91,19 @@ class RoomDetailView(DetailView):
         room = self.object
         user_profile = ensure_user_profile(self.request.user)
         is_member = room.is_member(user_profile)
+        can_view_content = room.can_view_content(user=self.request.user, profile=user_profile)
 
-        context["messages"] = room.messages.select_related("sender").prefetch_related("reactions__profile")
+        context["messages"] = (
+            room.messages.select_related("sender").prefetch_related("reactions__profile")
+            if can_view_content
+            else room.messages.none()
+        )
         context["form"] = kwargs.get("form", MessageForm())
         context["is_member"] = is_member
         context["can_manage_room"] = bool(
             self.request.user.is_staff or (user_profile and room.creator_id == user_profile.pk)
         )
+        context["can_view_content"] = can_view_content
         context["can_post_message"] = room.can_post(user=self.request.user, profile=user_profile)
         context["can_view_room"] = room.can_view(user=self.request.user, profile=user_profile)
         context["can_join_room"] = room.can_join(user=self.request.user, profile=user_profile)
@@ -241,6 +247,9 @@ class RoomInviteView(LoginRequiredMixin, UserPassesTestMixin, View):
                 invitee=form.cleaned_data["invitee"],
                 defaults={"invited_by": inviter, "accepted_at": None},
             )
+            if room.join_policy != Room.JOIN_INVITE:
+                room.join_policy = Room.JOIN_INVITE
+                room.save(update_fields=["join_policy"])
             create_invitation_notifications(invitation)
 
         return redirect("room_detail", pk=room.pk)

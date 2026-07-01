@@ -45,6 +45,6 @@ class RoomMessagesAPIView(generics.ListAPIView):
     def get_queryset(self):
         room = get_object_or_404(Room, pk=self.kwargs["pk"])
         profile = ensure_user_profile(self.request.user)
-        if not room.can_view(user=self.request.user, profile=profile):
+        if not room.can_view_content(user=self.request.user, profile=profile):
             raise PermissionDenied("You do not have access to this room.")
         return Message.objects.select_related("sender", "room").filter(room=room).order_by("-created_at")

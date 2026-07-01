@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from accounts_app.models import ChatUser
+from messages_app.models import Message
 
 from .models import Category, Membership, Room, Tag
 
@@ -21,7 +22,7 @@ class RoomTests(TestCase):
         self.room.members.add(self.owner.profile)
 
     def test_room_list_filter_by_category(self):
-        response = self.client.get(reverse("room_list"), {"category": self.category.pk})
+        response = self.client.get(reverse("room_list"), {"category": self.category.pk}, secure=True)
         self.assertContains(response, "Django Room")
 
     def test_room_create_adds_owner_membership(self):
@@ -29,6 +30,7 @@ class RoomTests(TestCase):
         response = self.client.post(
             reverse("room_create"),
             {"name": "New Room", "description": "Hello room", "category": self.category.pk, "tags": [self.tag.pk]},
+            secure=True,
         )
         self.assertRedirects(response, reverse("room_list"))
         room = Room.objects.get(name="New Room")
@@ -37,22 +39,30 @@ class RoomTests(TestCase):
 
     def test_room_join_adds_membership(self):
         self.client.login(username="member", password="pass12345")
-        response = self.client.post(reverse("room_join", args=[self.room.pk]))
+        response = self.client.post(reverse("room_join", args=[self.room.pk]), secure=True)
         self.assertRedirects(response, reverse("room_detail", args=[self.room.pk]))
         self.assertTrue(self.room.members.filter(pk=self.member.profile.pk).exists())
 
+    def test_non_member_cannot_see_room_messages(self):
+        Message.objects.create(sender=self.owner.profile, room=self.room, text="Secret room text")
+        self.client.login(username="member", password="pass12345")
+        response = self.client.get(reverse("room_detail", args=[self.room.pk]), secure=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Room content is members only")
+        self.assertNotContains(response, "Secret room text")
+
     def test_non_owner_cannot_edit_room(self):
         self.client.login(username="member", password="pass12345")
-        response = self.client.get(reverse("room_edit", args=[self.room.pk]))
+        response = self.client.get(reverse("room_edit", args=[self.room.pk]), secure=True)
         self.assertEqual(response.status_code, 403)
 
     def test_non_member_cannot_post_message(self):
         self.client.login(username="member", password="pass12345")
-        response = self.client.post(reverse("room_detail", args=[self.room.pk]), {"text": "Hello"})
+        response = self.client.post(reverse("room_detail", args=[self.room.pk]), {"text": "Hello"}, secure=True)
         self.assertRedirects(response, reverse("room_detail", args=[self.room.pk]))
         self.assertEqual(self.room.messages.count(), 0)
 
     def test_room_api_returns_room_data(self):
-        response = self.client.get(reverse("api_room_list"))
+        response = self.client.get(reverse("api_room_list"), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()[0]["name"], "Django Room")

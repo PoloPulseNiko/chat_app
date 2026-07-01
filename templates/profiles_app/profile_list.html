@@ -9,7 +9,7 @@
 
     <div class="list-group">
         {% for profile in profiles %}
-            <a href="{% url 'profile_detail' profile.pk %}" class="list-group-item list-group-item-action">
+            <div class="list-group-item">
                 <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
                     <div class="nt-profile-row">
                         {% if profile.avatar %}
@@ -25,6 +25,7 @@
                             <p class="mb-0">{{ profile.bio|truncatewords:15 }}</p>
                         </div>
                     </div>
+                    <a href="{% url 'profile_detail' profile.pk %}" class="btn btn-sm btn-outline-secondary">Open</a>
                     {% if user.is_staff or current_profile == profile %}
                         <div class="nt-inline-actions">
                             <a href="{% url 'profile_edit' profile.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
@@ -32,7 +33,7 @@
                         </div>
                     {% endif %}
                 </div>
-            </a>
+            </div>
         {% empty %}
             <p class="text-muted">No profiles yet.</p>
         {% endfor %}

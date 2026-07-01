@@ -109,6 +109,11 @@ class Room(models.Model):
             return self.is_member(profile) or self.has_pending_invite(profile)
         return False
 
+    def can_view_content(self, user=None, profile=None):
+        if user and user.is_staff:
+            return True
+        return self.is_member(profile)
+
     def can_join(self, user=None, profile=None):
         if not profile or (user and user.is_staff):
             return False
@@ -119,7 +124,7 @@ class Room(models.Model):
         return not self.is_member(profile)
 
     def can_post(self, user=None, profile=None):
-        if not self.can_view(user=user, profile=profile):
+        if not self.can_view_content(user=user, profile=profile):
             return False
         if user and user.is_staff:
             return True

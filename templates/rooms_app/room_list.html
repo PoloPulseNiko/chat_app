@@ -100,10 +100,12 @@
 
         <div class="list-group">
             {% for room in rooms %}
-                <a href="{% url 'room_detail' room.pk %}" class="list-group-item list-group-item-action">
+                <div class="list-group-item">
                     <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
                         <div>
-                            <h5 class="mb-1">{{ room.name }}</h5>
+                            <h5 class="mb-1">
+                                <a href="{% url 'room_detail' room.pk %}" class="text-reset text-decoration-none">{{ room.name }}</a>
+                            </h5>
                             <small class="text-muted">Created by {{ room.creator.nickname }}</small>
                         </div>
                         <div class="d-flex flex-wrap gap-2">
@@ -130,13 +132,16 @@
                             {% endfor %}
                         </small>
                     {% endif %}
+                    <div class="mt-2">
+                        <a href="{% url 'room_detail' room.pk %}" class="btn btn-sm btn-outline-secondary">Open</a>
+                    </div>
                     {% if user.is_staff or current_profile == room.creator %}
                         <div class="nt-inline-actions mt-2">
                             <a href="{% url 'room_edit' room.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
                             <a href="{% url 'room_delete' room.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
                         </div>
                     {% endif %}
-                </a>
+                </div>
             {% empty %}
                 <p class="text-muted">No rooms available yet.</p>
             {% endfor %}
