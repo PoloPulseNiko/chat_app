@@ -41,9 +41,15 @@ class RoomForm(forms.ModelForm):
             self.fields.pop("visibility")
             self.fields.pop("posting_policy")
             self.fields.pop("join_policy")
-        elif not user.is_staff:
+        elif user.is_staff:
+            return
+        elif self.instance and self.instance.pk and self.instance.creator.user_id == user.id:
             self.fields.pop("visibility")
             self.fields.pop("posting_policy")
+        else:
+            self.fields.pop("visibility")
+            self.fields.pop("posting_policy")
+            self.fields.pop("join_policy")
 
     def clean_name(self):
         name = self.cleaned_data.get("name")
