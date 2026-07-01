@@ -51,6 +51,10 @@
 
 <script>
     (function () {
+        document.querySelectorAll("textarea.nt-send-on-enter").forEach(function (textarea) {
+            textarea.value = "";
+        });
+
         const messageList = document.getElementById("direct-message-list");
         if (messageList) {
             window.requestAnimationFrame(function () {

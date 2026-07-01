@@ -221,6 +221,10 @@
   {% if can_view_content %}
   <script>
   (function () {
+    document.querySelectorAll("textarea.nt-send-on-enter").forEach(function (textarea) {
+      textarea.value = "";
+    });
+
     const refreshConfig = document.getElementById("room-refresh-config");
     const messageList = document.getElementById("room-message-list");
     if (!refreshConfig) {
