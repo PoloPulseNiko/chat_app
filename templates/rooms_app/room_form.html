@@ -119,6 +119,21 @@
                         {{ form.description.errors }}
                     </div>
 
+                    {% if form.join_policy %}
+                        <div class="mb-3 p-3 border rounded-3 bg-light">
+                            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                                <div>
+                                    {{ form.join_policy.label_tag }}
+                                    {% if form.join_policy.help_text %}<div class="form-text">{{ form.join_policy.help_text }}</div>{% endif %}
+                                </div>
+                                <div class="flex-grow-1" style="max-width: 18rem;">
+                                    {{ form.join_policy }}
+                                    {{ form.join_policy.errors }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
                     <details class="nt-room-advanced">
                         <summary class="nt-compact-toggle">Room Options</summary>
                         <div class="nt-room-advanced-fields">
@@ -143,14 +158,6 @@
                                         {{ form.posting_policy }}
                                         {% if form.posting_policy.help_text %}<div class="form-text">{{ form.posting_policy.help_text }}</div>{% endif %}
                                         {{ form.posting_policy.errors }}
-                                    </div>
-                                {% endif %}
-                                {% if form.join_policy %}
-                                    <div class="mb-3 mb-0">
-                                        {{ form.join_policy.label_tag }}
-                                        {{ form.join_policy }}
-                                        {% if form.join_policy.help_text %}<div class="form-text">{{ form.join_policy.help_text }}</div>{% endif %}
-                                        {{ form.join_policy.errors }}
                                     </div>
                                 {% endif %}
                             </div>

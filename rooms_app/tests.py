@@ -45,6 +45,8 @@ class RoomTests(TestCase):
 
     def test_room_owner_can_toggle_join_policy(self):
         self.client.login(username="owner", password="pass12345")
+        form_response = self.client.get(reverse("room_edit", args=[self.room.pk]), secure=True)
+        self.assertContains(form_response, "Join Policy")
         response = self.client.post(
             reverse("room_edit", args=[self.room.pk]),
             {
